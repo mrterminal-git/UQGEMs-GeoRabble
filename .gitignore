@@ -1,0 +1,64 @@
+# Python and notebook caches
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+.coverage
+htmlcov/
+
+# Local environments and editor state
+.env
+.venv/
+env/
+.vscode/
+
+# Generated logs and temporary files
+*.log
+*.tmp
+*.temp
+~$*
+
+# Raw and derived geospatial data can be very large. Keep the directory
+# documentation, but do not commit local datasets or generated products.
+data/raw/*
+!data/raw/README.md
+data/interim/*
+!data/interim/README.md
+data/processed/*
+!data/processed/README.md
+
+# Manual corrections are reviewed separately before being committed.
+data/manual/*
+!data/manual/README.md
+
+# Generated reports and rendered scenes
+reports/figures/*
+!reports/figures/README.md
+reports/scenes/*
+!reports/scenes/README.md
+reports/tables/*
+!reports/tables/README.md
+
+# Common large GIS and 3D formats if created outside the data directories
+*.las
+*.laz
+*.copc.laz
+*.tif
+*.tiff
+*.gpkg
+*.fgb
+*.parquet
+*.geoparquet
+*.vrt
+*.e57
+*.rcp
+*.rcs
+*.obj
+*.mtl
+*.glb
+*.gltf
+*.vtksz

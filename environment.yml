@@ -1,0 +1,44 @@
+name: uq-gis
+
+channels:
+  - conda-forge
+  - nodefaults
+
+dependencies:
+  - python=3.12
+  - pip
+  - jupyterlab
+  - ipykernel
+  - ipywidgets
+  - nbclient
+  - nbconvert
+  - numpy
+  - pandas
+  - scipy
+  - scikit-learn
+  - matplotlib
+  - plotly
+  - geopandas
+  - shapely
+  - pyproj
+  - pyogrio
+  - rasterio
+  - rioxarray
+  - xarray
+  - gdal
+  - pdal
+  - python-pdal
+  - laspy
+  - lazrs-python
+  - pyarrow
+  - pyvista
+  - vtk
+  - trame
+  - trame-vtk
+  - trame-vuetify
+  - lonboard
+  - trimesh
+  - pytest
+  - pytest-cov
+  - ruff
+
