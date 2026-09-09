@@ -27,6 +27,20 @@ conda run --name uq-gis pytest
 
 Then run `notebooks/00_environment_check.ipynb` from a fresh kernel. It writes a machine-readable diagnostic report to `reports/tables/environment_report.json`.
 
+## Run the Phase 2 synthetic workflow
+
+The Phase 2 scene is entirely fictional and is georeferenced near St Lucia only to test coordinate handling. It must not be interpreted as real UQ asset information.
+
+Run it from the command line:
+
+```powershell
+conda run --name uq-gis python pipelines/run_phase2.py
+```
+
+Or open `notebooks/phase2_synthetic_workflow.ipynb` with the **UQ GIS** kernel and run all cells. The notebook includes fixed-camera visual checks and an interactive PyVista view.
+
+Generated GIS data is written to `data/processed/synthetic/`; PNGs, interactive HTML and validation reports are written below `reports/`. These generated files are intentionally ignored by Git.
+
 ## Data policy
 
 - Files in `data/raw/` are immutable source material.
@@ -37,5 +51,4 @@ Then run `notebooks/00_environment_check.ipynb` from a fresh kernel. It writes a
 
 ## Status
 
-Phase 1 establishes the environment, repository structure, validation code and initial notebook. Phase 2 will validate the complete pipeline with a small synthetic terrain/building/utility scene before external data is introduced.
-
+Phases 1 and 2 are implemented. The synthetic workflow validates terrain, LoD1/LoD2 buildings, underground utilities, coordinate-preserving exports and Python-native 3D visualisation before external data is introduced.

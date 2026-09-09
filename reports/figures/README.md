@@ -1,4 +1,3 @@
 # Figures
 
-Generated fixed-camera maps, plots and 3D screenshots are written here.
-
+Generated fixed-camera maps, plots and 3D screenshots are written here. Phase 2 creates plan, oblique and transparent-terrain underground views.

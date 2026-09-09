@@ -17,6 +17,7 @@ dependencies:
   - scipy
   - scikit-learn
   - matplotlib
+  - pillow
   - plotly
   - geopandas
   - shapely
@@ -41,4 +42,3 @@ dependencies:
   - pytest
   - pytest-cov
   - ruff
-

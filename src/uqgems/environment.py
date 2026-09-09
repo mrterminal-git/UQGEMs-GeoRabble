@@ -19,6 +19,7 @@ MODULES: dict[str, str] = {
     "scipy": "scipy",
     "scikit-learn": "sklearn",
     "matplotlib": "matplotlib",
+    "pillow": "PIL",
     "plotly": "plotly",
     "geopandas": "geopandas",
     "shapely": "shapely",
