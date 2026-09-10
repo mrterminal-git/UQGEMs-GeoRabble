@@ -12,6 +12,9 @@ Reusable algorithms belong in `src/uqgems/`; notebooks document and orchestrate 
   decision gate.
 - `06_phase8_utility_standardisation.ipynb` acquires, standardises and validates the
   selected BCC and Urban Utilities public records without inventing utility depths.
+- `07_phase9_integrated_visualisation.ipynb` assembles the real terrain, LiDAR preview,
+  mixed-LoD buildings and display-only public utility alignments into an interactive
+  scene and fixed visual checks.
 
 Use the **UQ GIS** kernel and run a numbered notebook from top to bottom. Reusable
 algorithms remain in `src/uqgems/`; notebooks orchestrate them and expose visual checks.

@@ -390,6 +390,20 @@ Sensitive utility information must remain separate from any publishable output.
 
 ## 11. Phase 9: Integrated Python Visualisation
 
+**Implementation status (10 September 2026): complete for the public-data pilot.**
+
+The implemented builder combines the Phase 5 AHD terrain and 30,000-point display
+sample, all 58 Phase 7 mixed-LoD building meshes, and all three Phase 8 public utility
+records. It writes a self-contained Plotly HTML scene, fixed PyVista plan/oblique/
+cutaway views, a Matplotlib cross-section, configuration and layer inventories, and a
+hash-checked manifest. All 19 Phase 9 validation checks pass.
+
+Because all utility depths remain unknown, their authoritative geometry stays 2D.
+The visualisation shows dashed horizontal alignments at terrain plus a declared 0.75 m
+visibility offset and labels them as display-only. It does not place them underground.
+The result is documented in `PHASE9_INTEGRATED_VISUALISATION.md` and orchestrated by
+`notebooks/07_phase9_integrated_visualisation.ipynb`.
+
 Build a reusable scene function that accepts terrain, buildings, point clouds, utilities and a display configuration.
 
 Provide controls for:

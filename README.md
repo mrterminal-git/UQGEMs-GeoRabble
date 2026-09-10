@@ -132,6 +132,24 @@ measured result and limitations.
 The same workflow can be run from
 `notebooks/06_phase8_utility_standardisation.ipynb` with the **UQ GIS** kernel.
 
+## Run Phase 9 integrated visualisation
+
+After Phases 5, 7 and 8 pass, run:
+
+```powershell
+conda run --name uq-gis python pipelines/run_phase9.py
+```
+
+This combines the AHD terrain, a deterministic LiDAR preview, 58 mixed-LoD building
+solids and the three public utility records in a reusable Python scene. It creates a
+self-contained interactive HTML file plus fixed plan, oblique, utility-cutaway and
+cross-section checks. Utilities are dashed and display-draped above terrain because
+their physical depths are unknown; no underground position is implied. See
+[PHASE9_INTEGRATED_VISUALISATION.md](PHASE9_INTEGRATED_VISUALISATION.md).
+
+The same workflow can be run from
+`notebooks/07_phase9_integrated_visualisation.ipynb` with the **UQ GIS** kernel.
+
 ## Data policy
 
 - Files in `data/raw/` are immutable source material.
@@ -142,9 +160,11 @@ The same workflow can be run from
 
 ## Status
 
-Phases 1-8 are implemented for the public-data prototype. The pilot has validated
+Phases 1-9 are implemented for the public-data prototype. The pilot has validated
 terrain and LiDAR products, 58 complete LoD1 fallback solids, and nine selectively
 accepted LoD2 roofs (eight reliable and one approximate). The Phase 7 evidence does not
 support unattended campus-wide LoD2 conversion. Phase 8 queried 29 public utility
 layers but found only three intersecting 2D records and no defensible vertical values.
-This result can support a request for UQ-controlled or asset-owner utility data.
+Phase 9 integrates those products into a validated Python/HTML presentation while
+keeping the utility-depth limitation explicit. This result can support a request for
+UQ-controlled or asset-owner utility data.

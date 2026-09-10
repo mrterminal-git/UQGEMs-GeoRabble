@@ -16,3 +16,7 @@ Git.
 Phase 8 creates `utilities/` containing the standardised public utility GeoPackage and
 hash-based manifest. Utility geometry remains 2D unless a source has a verified vertical
 datum or usable surveyed depth; the current public pilot has neither.
+
+Phase 9 creates `scene/` containing the integrated-scene display configuration and a
+hash-based manifest. The rendered HTML and figures are stored under `reports/`.
+Utility terrain drapes are display-only and do not alter the Phase 8 source geometry.

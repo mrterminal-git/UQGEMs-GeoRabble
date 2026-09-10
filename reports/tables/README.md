@@ -12,3 +12,7 @@ decision-gate checks.
 Phase 7 writes all-building feasibility, accepted plane metrics and manual-review tables
 plus `phase7_lod2.json`, which records selective roof results, the mixed-model topology
 and 21 decision-gate checks.
+
+Phase 8 records public-utility source coverage, standardised assets and validation
+issues. Phase 9 writes scene layer/control inventories, a cross-section profile and
+`phase9_scene.json`, which records configuration, output metadata and 19 checks.
