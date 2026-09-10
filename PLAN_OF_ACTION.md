@@ -172,6 +172,8 @@ notes
 
 ## 6. Phase 4: Coordinate-System Normalisation
 
+**Implementation status:** Complete. The native GDA94 elevation products are transformed with the explicit EPSG:8447 conformal-and-distortion grid operation, AHD Z values are retained, public vector/context sources are normalised, and a reversible display origin is documented.
+
 Inspect rather than assume the coordinate reference system and vertical datum of every source.
 
 The provisional working target is:

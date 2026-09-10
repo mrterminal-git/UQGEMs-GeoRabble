@@ -149,24 +149,25 @@ def extract_selected_elvis_2019(
     }
 
 
-def _download(url: str, destination: Path) -> Path:
+def download_file(url: str, destination: str | Path) -> Path:
     """Download a source file once, leaving an existing raw file unchanged."""
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    if destination.is_file():
-        return destination
+    destination_path = Path(destination)
+    destination_path.parent.mkdir(parents=True, exist_ok=True)
+    if destination_path.is_file():
+        return destination_path
     request = urllib.request.Request(
         url,
         headers={"User-Agent": "UQGEMs-GeoRabble/0.1 research prototype"},
     )
-    partial = destination.with_suffix(destination.suffix + ".part")
+    partial = destination_path.with_suffix(destination_path.suffix + ".part")
     try:
         with urllib.request.urlopen(request, timeout=120) as response:  # noqa: S310
             with partial.open("wb") as target:
                 shutil.copyfileobj(response, target, length=1024 * 1024)
-        partial.replace(destination)
+        partial.replace(destination_path)
     finally:
         partial.unlink(missing_ok=True)
-    return destination
+    return destination_path
 
 
 def _query_url(endpoint: str, parameters: dict[str, str]) -> str:
@@ -249,4 +250,4 @@ def acquire_public_context(raw_dir: str | Path) -> dict[str, Path]:
         "qld_imagery_service": raw / "qld_imagery" / "service_metadata.json",
         "uq_campus_map": raw / "uq_public" / "St-Lucia-campus-map.pdf",
     }
-    return {name: _download(urls[name], path) for name, path in destinations.items()}
+    return {name: download_file(urls[name], path) for name, path in destinations.items()}

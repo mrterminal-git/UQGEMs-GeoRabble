@@ -51,6 +51,18 @@ conda run --name uq-gis python pipelines/run_phase3.py
 
 This selects the Brisbane 2019 classified LiDAR and 1 m DEM, downloads the small public-data extracts for the pilot area, creates `data/dataset_register.csv`, and writes a validation report and alignment figure below `reports/`. See [PHASE3_DATA_PROVENANCE.md](PHASE3_DATA_PROVENANCE.md) for source roles, licences and limitations.
 
+## Run Phase 4 coordinate normalisation
+
+After Phase 3 passes, run:
+
+```powershell
+conda run --name uq-gis python pipelines/run_phase4.py
+```
+
+This uses the locally cached official conformal-and-distortion grid to transform the native GDA94 elevation sources to GDA2020 / MGA zone 56 (`EPSG:7856`), preserves AHD elevations, standardises vector layers and records the display-only local origin. See [PHASE4_CRS_NORMALISATION.md](PHASE4_CRS_NORMALISATION.md).
+
+The same workflow can be run interactively from `notebooks/02_phase4_coordinate_normalisation.ipynb` using the **UQ GIS** kernel. Once the first transformation is complete, matching source and configuration hashes allow the notebook to reuse the validated products.
+
 ## Data policy
 
 - Files in `data/raw/` are immutable source material.
@@ -61,4 +73,4 @@ This selects the Brisbane 2019 classified LiDAR and 1 m DEM, downloads the small
 
 ## Status
 
-Phases 1 and 2 are implemented. Phase 3 is implemented for the public-data prototype; UQ-controlled BIM and utility acquisition is intentionally deferred until the LoD demonstration is ready. The synthetic workflow validates terrain, LoD1/LoD2 buildings, underground utilities, coordinate-preserving exports and Python-native 3D visualisation before external data is introduced.
+Phases 1–4 are implemented for the public-data prototype; UQ-controlled BIM and utility acquisition is intentionally deferred until the LoD demonstration is ready. All modelling inputs are normalised to the documented horizontal CRS while retaining AHD elevations and immutable raw sources.
