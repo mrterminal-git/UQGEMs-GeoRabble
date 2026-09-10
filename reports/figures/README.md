@@ -7,3 +7,6 @@ figures.
 
 Phase 6 adds the LoD1 confidence plan, class-6 roof-point plan, isolated roof examples,
 height distribution and fixed northeast/southwest oblique validation views.
+
+Phase 7 adds the LoD2 feasibility map, accepted plane/ridge map, roof-fit examples,
+residual decision plot and fixed mixed-LoD northeast/southwest views.

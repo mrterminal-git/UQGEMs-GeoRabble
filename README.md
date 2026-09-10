@@ -97,6 +97,23 @@ three deliberately withheld low-height outlines.
 The same workflow can be run from `notebooks/04_phase6_lod1_buildings.ipynb` with the
 **UQ GIS** kernel.
 
+## Run Phase 7 selective LoD2 modelling
+
+After Phase 6 passes, run:
+
+```powershell
+conda run --name uq-gis python pipelines/run_phase7.py
+```
+
+This assesses every pilot footprint, fits robust roof planes only for supported
+non-boundary candidates, and writes a mixed LoD1/LoD2 GeoPackage and GLB. Roofs that do
+not pass residual, partition and closed-shell gates retain their Phase 6 LoD1 geometry.
+See [PHASE7_LOD2_FEASIBILITY.md](PHASE7_LOD2_FEASIBILITY.md) for the method, measured
+results and the campus-wide decision gate.
+
+The same workflow can be run from `notebooks/05_phase7_lod2_feasibility.ipynb` with the
+**UQ GIS** kernel.
+
 ## Data policy
 
 - Files in `data/raw/` are immutable source material.
@@ -107,7 +124,8 @@ The same workflow can be run from `notebooks/04_phase6_lod1_buildings.ipynb` wit
 
 ## Status
 
-Phases 1–6 are implemented for the public-data prototype. The pilot now has validated
-terrain and LiDAR products plus 58 defensible LoD1 building solids; three source
-outlines are retained with heights withheld. UQ-controlled BIM and utility acquisition
-remains deferred while the public-data demonstration is developed.
+Phases 1-7 are implemented for the public-data prototype. The pilot has validated
+terrain and LiDAR products, 58 complete LoD1 fallback solids, and nine selectively
+accepted LoD2 roofs (eight reliable and one approximate). The Phase 7 evidence does not
+support unattended campus-wide LoD2 conversion. UQ-controlled BIM and utility
+acquisition remains deferred while the public-data demonstration is developed.

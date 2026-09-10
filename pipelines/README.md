@@ -15,4 +15,5 @@ conda run --name uq-gis python pipelines/run_phase3.py
 conda run --name uq-gis python pipelines/run_phase4.py
 conda run --name uq-gis python pipelines/run_phase5.py
 conda run --name uq-gis python pipelines/run_phase6.py
+conda run --name uq-gis python pipelines/run_phase7.py
 ```

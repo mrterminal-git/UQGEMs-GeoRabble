@@ -319,6 +319,20 @@ Assign each building one of these statuses:
 
 Proceed with campus-wide automated LoD2 processing only if the pilot produces useful and defensible roof geometry. Otherwise, retain LoD1 and use UQ BIM or selective manual modelling for priority buildings.
 
+### Implemented pilot result
+
+Phase 7 assesses all 61 pilot footprints. Forty-two meet the source-support candidate
+gate; eight earn reliable LoD2 and one earns approximate LoD2. The accepted set contains
+17 roof planes and 10 ridge/intersection segments. Twenty-seven records remain LoD1,
+22 require manual correction for a detailed roof, and three retain the Phase 6
+missing/outdated-source status. All 58 mixed-model solids are watertight and have
+positive volume.
+
+The decision gate is therefore **selective mixed LoD, not unattended campus-wide
+LoD2**. Keep LoD1 as the complete baseline and use current UQ BIM or manual constraints
+for priority buildings that fail the automated gates. The detailed evidence is recorded
+in `PHASE7_LOD2_FEASIBILITY.md` and `reports/tables/phase7_lod2.json`.
+
 ## 10. Phase 8: Utility Data Standardisation
 
 Convert utility sources into a common network schema containing at least:
