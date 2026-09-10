@@ -17,3 +17,7 @@ building and utility-proximity cross-section.
 
 Phase 10 adds `phase10_validation_dashboard.png`, summarising prior phase checks,
 fresh-kernel notebook execution and the final reproducibility requirements matrix.
+
+Phase 11 adds fixed textured plan and oblique views plus a side-by-side Phase 9/11
+analysis-versus-presentation comparison. Each presentation image discloses the 2022
+orthophoto, 2019 LiDAR, schematic facades and unknown utility depth.

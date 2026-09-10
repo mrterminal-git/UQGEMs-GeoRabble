@@ -24,3 +24,8 @@ Utility terrain drapes are display-only and do not alter the Phase 8 source geom
 Phase 10 creates `validation/phase10_manifest.json`, which records the hashes of the
 consolidated local reproducibility evidence. The audit does not modify authoritative
 source geometry or delete earlier outputs.
+
+Phase 11 creates `materials/` containing web-ready orthophoto and procedural facade
+textures, the UV-mapped textured GLB, configuration and hash manifest. These are
+presentation derivatives: observed imagery is used only for terrain and roofs, while
+facades are explicitly schematic and source geometry is unchanged.

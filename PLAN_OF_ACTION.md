@@ -474,7 +474,24 @@ The project is reproducible when:
 - fixed-camera images demonstrate correct layer alignment;
 - approximate utilities are never presented as survey-accurate.
 
-## 13. Immediate Execution Sequence
+## 13. Phase 11: Materials and Texture Mapping
+
+**Implementation status (September 2026): complete for the public-data pilot.**
+
+The hybrid presentation workflow preserves the Phase 9 analytical scene and adds a
+second skin with the 2022 Queensland public orthophoto draped over terrain and projected
+onto roofs. Facades use an explicitly schematic procedural panel/window material because
+the available nadir imagery and LiDAR do not observe facade appearance. A mode-switching
+HTML wrapper, self-contained textured PyVista scene, UV-mapped GLB, fixed validation
+figures and material-provenance tables are documented in
+`PHASE11_MATERIALS_AND_TEXTURES.md`.
+
+All 58 modelled buildings and all 2,432 source building triangles are retained without
+coordinate changes. Utility styling remains symbolic, source geometry remains 2D, and
+physical depth remains unknown. The imagery/LiDAR date mismatch and schematic-facade
+status remain visible in the viewer and validation outputs.
+
+## 14. Immediate Execution Sequence
 
 1. Create the dedicated Conda environment.
 2. Create the project directory structure.
@@ -489,7 +506,7 @@ The project is reproducible when:
 11. Import and validate a sample utility network.
 12. Scale the proven workflow to the complete St Lucia campus.
 
-## 14. Principal Risks and Controls
+## 15. Principal Risks and Controls
 
 | Risk | Control |
 |---|---|
@@ -503,3 +520,5 @@ The project is reproducible when:
 | Point clouds exceed available memory | Use PDAL streaming, spatial tiles and display downsampling |
 | Notebook execution has hidden state | Restart the kernel and run all notebooks during validation |
 | 3D rendering loses precision at large coordinates | Render relative to a documented local origin |
+| Textures imply more certainty than the geometry supports | Keep analysis and presentation skins separate and label source dates/factuality |
+| Nadir imagery is mistaken for facade evidence | Label procedural facades as schematic and seek licensed oblique imagery or UQ BIM materials |

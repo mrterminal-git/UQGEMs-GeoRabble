@@ -20,3 +20,7 @@ issues. Phase 9 writes scene layer/control inventories, a cross-section profile 
 Phase 10 writes the consolidated phase/notebook/register/manifest/hash/CRS/figure/
 software/quality evidence and `phase10_reproducibility.json`. Separate fresh-kernel
 notebook copies are retained below `phase10_notebooks/`.
+
+Phase 11 writes the material provenance inventory, a per-building triangle/UV audit and
+`phase11_skins.json`. The tables distinguish observed roof/terrain imagery from
+procedural facade materials and retain the imagery/LiDAR date mismatch.

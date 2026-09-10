@@ -17,6 +17,8 @@ Reusable algorithms belong in `src/uqgems/`; notebooks document and orchestrate 
   scene and fixed visual checks.
 - `08_phase10_reproducibility_validation.ipynb` presents the consolidated fresh-kernel,
   provenance, hash, spatial-reference, confidence and quality-gate audit.
+- `09_phase11_materials_and_textures.ipynb` generates and reviews the orthophoto
+  terrain/roof skin, schematic facade material, textured GLB and switchable viewer.
 
 Use the **UQ GIS** kernel and run a numbered notebook from top to bottom. Reusable
 algorithms remain in `src/uqgems/`; notebooks orchestrate them and expose visual checks.

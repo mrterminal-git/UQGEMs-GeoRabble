@@ -167,6 +167,23 @@ existing raw and derived data and does not access publication services. See
 The consolidated results can be inspected in
 `notebooks/08_phase10_reproducibility_validation.ipynb` with the **UQ GIS** kernel.
 
+## Run Phase 11 materials and textures
+
+After the Phase 10 baseline passes, run:
+
+```powershell
+conda run --name uq-gis python pipelines/run_phase11.py
+```
+
+This preserves the analytical Phase 9 scene and creates a presentation skin using the
+2022 public orthophoto on terrain and roofs plus an explicitly schematic facade
+material. Open `reports/scenes/uq_pilot_skin_viewer.html` to switch between the modes.
+The textured scene and GLB retain the unknown-depth utility warning. See
+[PHASE11_MATERIALS_AND_TEXTURES.md](PHASE11_MATERIALS_AND_TEXTURES.md).
+
+The same workflow can be run from
+`notebooks/09_phase11_materials_and_textures.ipynb` with the **UQ GIS** kernel.
+
 ## Data policy
 
 - Files in `data/raw/` are immutable source material.
@@ -177,12 +194,14 @@ The consolidated results can be inspected in
 
 ## Status
 
-Phases 1-10 are implemented for the public-data prototype. The pilot has validated
+Phases 1-11 are implemented for the public-data prototype. The pilot has validated
 terrain and LiDAR products, 58 complete LoD1 fallback solids, and nine selectively
 accepted LoD2 roofs (eight reliable and one approximate). The Phase 7 evidence does not
 support unattended campus-wide LoD2 conversion. Phase 8 queried 29 public utility
 layers but found only three intersecting 2D records and no defensible vertical values.
 Phase 9 integrates those products into a validated Python/HTML presentation while
 keeping the utility-depth limitation explicit. Phase 10 provides the consolidated
-reproducibility and integrity evidence. This result can support a request for
-UQ-controlled or asset-owner utility data.
+reproducibility and integrity evidence. Phase 11 adds switchable analytical and
+presentation skins: 2022 public orthophoto imagery on terrain and roofs, explicitly
+schematic facades, a textured GLB and a self-contained PyVista HTML scene. This result
+can support a request for UQ-controlled or asset-owner utility and BIM material data.
