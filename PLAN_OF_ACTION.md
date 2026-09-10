@@ -335,6 +335,14 @@ in `PHASE7_LOD2_FEASIBILITY.md` and `reports/tables/phase7_lod2.json`.
 
 ## 10. Phase 8: Utility Data Standardisation
 
+**Implementation status: complete for the agreed no-login public-data pilot.** The
+pipeline queries 29 BCC and Urban Utilities source layers and standardises the three
+intersecting records: one stormwater pipe, one stormwater manhole and one water service.
+No record has a verified AHD elevation or usable depth, so all geometry remains
+explicitly 2D and no schematic depth is imposed. The measured coverage gaps, vertical
+gate and validation findings are documented in
+`PHASE8_UTILITY_STANDARDISATION.md`. All 24 validation checks pass.
+
 Convert utility sources into a common network schema containing at least:
 
 ```text

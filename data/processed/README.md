@@ -12,3 +12,7 @@ Phase 7 creates `lod2/` containing the all-building feasibility record, accepted
 planes and ridges, mixed LoD1/LoD2 local-origin GLB, fit samples and hash-based manifest.
 Rejected roofs retain the Phase 6 LoD1 shell. These generated products are ignored by
 Git.
+
+Phase 8 creates `utilities/` containing the standardised public utility GeoPackage and
+hash-based manifest. Utility geometry remains 2D unless a source has a verified vertical
+datum or usable surveyed depth; the current public pilot has neither.

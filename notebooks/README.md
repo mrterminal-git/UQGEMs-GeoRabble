@@ -10,6 +10,8 @@ Reusable algorithms belong in `src/uqgems/`; notebooks document and orchestrate 
 - `04_phase6_lod1_buildings.ipynb` creates and validates conservative LoD1 buildings.
 - `05_phase7_lod2_feasibility.ipynb` assesses selective LoD2 roofs and the mixed-LoD
   decision gate.
+- `06_phase8_utility_standardisation.ipynb` acquires, standardises and validates the
+  selected BCC and Urban Utilities public records without inventing utility depths.
 
 Use the **UQ GIS** kernel and run a numbered notebook from top to bottom. Reusable
 algorithms remain in `src/uqgems/`; notebooks orchestrate them and expose visual checks.

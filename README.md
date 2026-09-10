@@ -114,6 +114,24 @@ results and the campus-wide decision gate.
 The same workflow can be run from `notebooks/05_phase7_lod2_feasibility.ipynb` with the
 **UQ GIS** kernel.
 
+## Run Phase 8 public utility standardisation
+
+After Phase 7 passes, run:
+
+```powershell
+conda run --name uq-gis python pipelines/run_phase8.py
+```
+
+This queries the BCC stormwater and Urban Utilities water/sewer services for the
+existing pilot, caches immutable public responses, maps returned records into the
+common utility schema and produces coverage and validation reports. It does not invent
+depths: utilities without a verified AHD elevation or usable depth remain explicitly
+2D. See [PHASE8_UTILITY_STANDARDISATION.md](PHASE8_UTILITY_STANDARDISATION.md) for the
+measured result and limitations.
+
+The same workflow can be run from
+`notebooks/06_phase8_utility_standardisation.ipynb` with the **UQ GIS** kernel.
+
 ## Data policy
 
 - Files in `data/raw/` are immutable source material.
@@ -124,8 +142,9 @@ The same workflow can be run from `notebooks/05_phase7_lod2_feasibility.ipynb` w
 
 ## Status
 
-Phases 1-7 are implemented for the public-data prototype. The pilot has validated
+Phases 1-8 are implemented for the public-data prototype. The pilot has validated
 terrain and LiDAR products, 58 complete LoD1 fallback solids, and nine selectively
 accepted LoD2 roofs (eight reliable and one approximate). The Phase 7 evidence does not
-support unattended campus-wide LoD2 conversion. UQ-controlled BIM and utility
-acquisition remains deferred while the public-data demonstration is developed.
+support unattended campus-wide LoD2 conversion. Phase 8 queried 29 public utility
+layers but found only three intersecting 2D records and no defensible vertical values.
+This result can support a request for UQ-controlled or asset-owner utility data.
