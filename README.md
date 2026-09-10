@@ -41,6 +41,16 @@ Or open `notebooks/phase2_synthetic_workflow.ipynb` with the **UQ GIS** kernel a
 
 Generated GIS data is written to `data/processed/synthetic/`; PNGs, interactive HTML and validation reports are written below `reports/`. These generated files are intentionally ignored by Git.
 
+## Run Phase 3 data acquisition
+
+Place the six unchanged ELVIS order archives in `data/raw/elvis/incoming/`, then run:
+
+```powershell
+conda run --name uq-gis python pipelines/run_phase3.py
+```
+
+This selects the Brisbane 2019 classified LiDAR and 1 m DEM, downloads the small public-data extracts for the pilot area, creates `data/dataset_register.csv`, and writes a validation report and alignment figure below `reports/`. See [PHASE3_DATA_PROVENANCE.md](PHASE3_DATA_PROVENANCE.md) for source roles, licences and limitations.
+
 ## Data policy
 
 - Files in `data/raw/` are immutable source material.
@@ -51,4 +61,4 @@ Generated GIS data is written to `data/processed/synthetic/`; PNGs, interactive 
 
 ## Status
 
-Phases 1 and 2 are implemented. The synthetic workflow validates terrain, LoD1/LoD2 buildings, underground utilities, coordinate-preserving exports and Python-native 3D visualisation before external data is introduced.
+Phases 1 and 2 are implemented. Phase 3 is implemented for the public-data prototype; UQ-controlled BIM and utility acquisition is intentionally deferred until the LoD demonstration is ready. The synthetic workflow validates terrain, LoD1/LoD2 buildings, underground utilities, coordinate-preserving exports and Python-native 3D visualisation before external data is introduced.

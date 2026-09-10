@@ -115,6 +115,8 @@ Do not start full ELVIS processing until the synthetic workflow can be run from 
 
 ## 5. Phase 3: Data Acquisition and Provenance
 
+**Implementation status:** Complete for the public-data prototype. The ELVIS order and public context sources are inventoried by a reproducible pipeline. UQ-controlled BIM, digital-twin and utility access is intentionally deferred until the public LoD demonstration is available to support the request.
+
 ### 5.1 ELVIS elevation data
 
 Begin with a pilot area of approximately 500 by 500 metres containing several buildings with different roof forms. Download:
@@ -445,4 +447,3 @@ The project is reproducible when:
 | Point clouds exceed available memory | Use PDAL streaming, spatial tiles and display downsampling |
 | Notebook execution has hidden state | Restart the kernel and run all notebooks during validation |
 | 3D rendering loses precision at large coordinates | Render relative to a documented local origin |
-
