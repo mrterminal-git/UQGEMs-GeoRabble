@@ -63,6 +63,23 @@ This uses the locally cached official conformal-and-distortion grid to transform
 
 The same workflow can be run interactively from `notebooks/02_phase4_coordinate_normalisation.ipynb` using the **UQ GIS** kernel. Once the first transformation is complete, matching source and configuration hashes allow the notebook to reuse the validated products.
 
+## Run Phase 5 terrain and LiDAR preparation
+
+After Phase 4 passes, run:
+
+```powershell
+conda run --name uq-gis python pipelines/run_phase5.py
+```
+
+This streams the LiDAR crop, preserves a full-resolution audit copy, creates a filtered
+modelling copy and deterministic display sample, and derives the one-metre DTM, DSM,
+normalised height, density and ground-residual products. See
+[PHASE5_TERRAIN_LIDAR_PREPARATION.md](PHASE5_TERRAIN_LIDAR_PREPARATION.md) for the measured
+results and declared filtering decisions.
+
+The same workflow can be run from
+`notebooks/03_phase5_terrain_lidar_preparation.ipynb` with the **UQ GIS** kernel.
+
 ## Data policy
 
 - Files in `data/raw/` are immutable source material.
@@ -73,4 +90,4 @@ The same workflow can be run interactively from `notebooks/02_phase4_coordinate_
 
 ## Status
 
-Phases 1–4 are implemented for the public-data prototype; UQ-controlled BIM and utility acquisition is intentionally deferred until the LoD demonstration is ready. All modelling inputs are normalised to the documented horizontal CRS while retaining AHD elevations and immutable raw sources.
+Phases 1–5 are implemented for the public-data prototype; UQ-controlled BIM and utility acquisition is intentionally deferred until the LoD demonstration is ready. The terrain and LiDAR inputs are now cropped, filtered, quality-controlled and ready for Phase 6 LoD1 building generation.

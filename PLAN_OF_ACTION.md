@@ -207,6 +207,10 @@ No dataset proceeds to modelling with an unknown horizontal CRS or vertical datu
 
 ## 7. Phase 5: Terrain and LiDAR Preparation
 
+**Implementation status: complete for the 500 m by 500 m public-data pilot.** The
+reproducible pipeline, notebook, output register and measured validation results are
+documented in `PHASE5_TERRAIN_LIDAR_PREPARATION.md`. All 22 validation checks pass.
+
 Use PDAL and Rasterio to:
 
 - crop data to the pilot boundary;
