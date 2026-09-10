@@ -80,6 +80,23 @@ results and declared filtering decisions.
 The same workflow can be run from
 `notebooks/03_phase5_terrain_lidar_preparation.ipynb` with the **UQ GIS** kernel.
 
+## Run Phase 6 LoD1 building generation
+
+After Phase 5 passes, run:
+
+```powershell
+conda run --name uq-gis python pipelines/run_phase6.py
+```
+
+This combines the public Queensland outlines with robust class-6 LiDAR elevations and
+the Phase 5 DTM. It writes an authoritative building GeoPackage, a local GLB presentation
+mesh, confidence classifications and building-level review reports. See
+[PHASE6_LOD1_BUILDINGS.md](PHASE6_LOD1_BUILDINGS.md) for the method, measured results and
+three deliberately withheld low-height outlines.
+
+The same workflow can be run from `notebooks/04_phase6_lod1_buildings.ipynb` with the
+**UQ GIS** kernel.
+
 ## Data policy
 
 - Files in `data/raw/` are immutable source material.
@@ -90,4 +107,7 @@ The same workflow can be run from
 
 ## Status
 
-Phases 1–5 are implemented for the public-data prototype; UQ-controlled BIM and utility acquisition is intentionally deferred until the LoD demonstration is ready. The terrain and LiDAR inputs are now cropped, filtered, quality-controlled and ready for Phase 6 LoD1 building generation.
+Phases 1–6 are implemented for the public-data prototype. The pilot now has validated
+terrain and LiDAR products plus 58 defensible LoD1 building solids; three source
+outlines are retained with heights withheld. UQ-controlled BIM and utility acquisition
+remains deferred while the public-data demonstration is developed.

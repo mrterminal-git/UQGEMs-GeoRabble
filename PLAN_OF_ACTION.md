@@ -241,6 +241,11 @@ Full-resolution LiDAR should be processed through PDAL without loading the entir
 
 ## 8. Phase 6: LoD1 Building Generation
 
+**Implementation status: complete for the public-data pilot.** The complete 61-outline
+inventory, 58 defensible LoD1 solids, three withheld exceptions, confidence model,
+validation figures and audit tables are documented in `PHASE6_LOD1_BUILDINGS.md`. All
+23 validation checks pass.
+
 For each building footprint:
 
 1. validate and, where safe, repair its geometry;
