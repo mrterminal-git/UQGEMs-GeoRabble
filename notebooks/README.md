@@ -15,6 +15,8 @@ Reusable algorithms belong in `src/uqgems/`; notebooks document and orchestrate 
 - `07_phase9_integrated_visualisation.ipynb` assembles the real terrain, LiDAR preview,
   mixed-LoD buildings and display-only public utility alignments into an interactive
   scene and fixed visual checks.
+- `08_phase10_reproducibility_validation.ipynb` presents the consolidated fresh-kernel,
+  provenance, hash, spatial-reference, confidence and quality-gate audit.
 
 Use the **UQ GIS** kernel and run a numbered notebook from top to bottom. Reusable
 algorithms remain in `src/uqgems/`; notebooks orchestrate them and expose visual checks.

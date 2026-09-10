@@ -150,6 +150,23 @@ their physical depths are unknown; no underground position is implied. See
 The same workflow can be run from
 `notebooks/07_phase9_integrated_visualisation.ipynb` with the **UQ GIS** kernel.
 
+## Run Phase 10 reproducibility validation
+
+After Phase 9 passes, run:
+
+```powershell
+conda run --name uq-gis python pipelines/run_phase10.py
+```
+
+This performs a non-destructive replay of every workflow notebook in a separate fresh
+kernel, audits source and derived hashes, checks provenance/CRS/datum/confidence fields,
+validates the fixed figures, and runs the full test and lint gates. It preserves the
+existing raw and derived data and does not access publication services. See
+[PHASE10_REPRODUCIBILITY_VALIDATION.md](PHASE10_REPRODUCIBILITY_VALIDATION.md).
+
+The consolidated results can be inspected in
+`notebooks/08_phase10_reproducibility_validation.ipynb` with the **UQ GIS** kernel.
+
 ## Data policy
 
 - Files in `data/raw/` are immutable source material.
@@ -160,11 +177,12 @@ The same workflow can be run from
 
 ## Status
 
-Phases 1-9 are implemented for the public-data prototype. The pilot has validated
+Phases 1-10 are implemented for the public-data prototype. The pilot has validated
 terrain and LiDAR products, 58 complete LoD1 fallback solids, and nine selectively
 accepted LoD2 roofs (eight reliable and one approximate). The Phase 7 evidence does not
 support unattended campus-wide LoD2 conversion. Phase 8 queried 29 public utility
 layers but found only three intersecting 2D records and no defensible vertical values.
 Phase 9 integrates those products into a validated Python/HTML presentation while
-keeping the utility-depth limitation explicit. This result can support a request for
+keeping the utility-depth limitation explicit. Phase 10 provides the consolidated
+reproducibility and integrity evidence. This result can support a request for
 UQ-controlled or asset-owner utility data.

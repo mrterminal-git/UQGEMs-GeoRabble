@@ -437,19 +437,28 @@ The PNG files are the principal collaborative visual checks because they can be 
 
 ## 12. Phase 10: Reproducibility and Validation
 
-Use a numbered notebook sequence:
+**Implementation status (September 2026): implemented for the public-data pilot.**
+
+The implemented audit preserves all data, executes each Phase 1-10 notebook in its own
+fresh `uq-gis` kernel, verifies prior decision gates and declared outputs, checks raw
+and derived hashes, audits provenance/CRS/datum/confidence metadata, and runs the full
+test and lint suites. It writes a consolidated report, evidence tables, dashboard,
+manifest and reproducibility register. The exact results and limitations are recorded
+in `PHASE10_REPRODUCIBILITY_VALIDATION.md`.
+
+The implemented notebook sequence is:
 
 ```text
 00_environment_check.ipynb
-01_data_inventory.ipynb
-02_crs_and_datums.ipynb
-03_lidar_quality.ipynb
-04_surface_models.ipynb
-05_lod1_buildings.ipynb
-06_lod2_roofs.ipynb
-07_utilities.ipynb
-08_integrated_scene.ipynb
-09_validation_report.ipynb
+phase2_synthetic_workflow.ipynb
+01_phase3_data_inventory.ipynb
+02_phase4_coordinate_normalisation.ipynb
+03_phase5_terrain_lidar_preparation.ipynb
+04_phase6_lod1_buildings.ipynb
+05_phase7_lod2_feasibility.ipynb
+06_phase8_utility_standardisation.ipynb
+07_phase9_integrated_visualisation.ipynb
+08_phase10_reproducibility_validation.ipynb
 ```
 
 Reusable algorithms should live in `src/`; notebooks should document and orchestrate them.

@@ -7,3 +7,5 @@
 
 Large data files are intentionally excluded from Git.
 
+`reproducibility_register.csv` records the final non-destructive Phase 10 validation
+result and the hash of its consolidated report.

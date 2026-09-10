@@ -20,3 +20,7 @@ datum or usable surveyed depth; the current public pilot has neither.
 Phase 9 creates `scene/` containing the integrated-scene display configuration and a
 hash-based manifest. The rendered HTML and figures are stored under `reports/`.
 Utility terrain drapes are display-only and do not alter the Phase 8 source geometry.
+
+Phase 10 creates `validation/phase10_manifest.json`, which records the hashes of the
+consolidated local reproducibility evidence. The audit does not modify authoritative
+source geometry or delete earlier outputs.

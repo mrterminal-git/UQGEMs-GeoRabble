@@ -18,4 +18,8 @@ conda run --name uq-gis python pipelines/run_phase6.py
 conda run --name uq-gis python pipelines/run_phase7.py
 conda run --name uq-gis python pipelines/run_phase8.py
 conda run --name uq-gis python pipelines/run_phase9.py
+conda run --name uq-gis python pipelines/run_phase10.py
 ```
+
+Phase 10 is a non-destructive validation replay. It executes each notebook in a fresh
+kernel and writes separate executed copies below `reports/tables/phase10_notebooks/`.

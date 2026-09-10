@@ -14,3 +14,6 @@ residual decision plot and fixed mixed-LoD northeast/southwest views.
 Phase 8 adds public-utility coverage and vertical-evidence checks. Phase 9 adds fixed
 integrated plan and oblique views, a western utility cutaway and a north-south terrain,
 building and utility-proximity cross-section.
+
+Phase 10 adds `phase10_validation_dashboard.png`, summarising prior phase checks,
+fresh-kernel notebook execution and the final reproducibility requirements matrix.
