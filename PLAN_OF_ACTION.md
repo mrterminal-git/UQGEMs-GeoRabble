@@ -491,6 +491,12 @@ coordinate changes. Utility styling remains symbolic, source geometry remains 2D
 physical depth remains unknown. The imagery/LiDAR date mismatch and schematic-facade
 status remain visible in the viewer and validation outputs.
 
+The Phase 11 addendum also streams the 6,473,167-point analysis cloud and screens all
+58 buildings across 586 footprint-wall segments. Six individual segments have
+sufficient evidence, but no complete building passes the conservative multi-facade
+gate: 19 buildings are marginal and 39 are insufficient. The strongest five are
+retained for manual diagnostic review; no walls or skins are changed automatically.
+
 ## 14. Immediate Execution Sequence
 
 1. Create the dedicated Conda environment.

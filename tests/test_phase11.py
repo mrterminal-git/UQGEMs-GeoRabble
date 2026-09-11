@@ -3,6 +3,11 @@
 import numpy as np
 import pytest
 
+from uqgems.facade_evidence import (
+    FacadeAuditConfig,
+    _scan_angle_degrees,
+    facade_segment_status,
+)
 from uqgems.skins import (
     SkinConfig,
     classify_surface_faces,
@@ -45,3 +50,33 @@ def test_procedural_facade_texture_is_deterministic_and_not_flat() -> None:
     assert first.shape == (128, 128, 3)
     assert np.array_equal(first, second)
     assert len(np.unique(first.reshape(-1, 3), axis=0)) >= 5
+
+
+def test_las14_scan_angles_are_converted_from_006_degree_units() -> None:
+    values = _scan_angle_degrees(np.asarray([-500, 0, 5500]), point_format_id=6)
+    np.testing.assert_allclose(values, [-3.0, 0.0, 33.0])
+
+
+def test_facade_segment_gate_distinguishes_geometry_evidence_levels() -> None:
+    config = FacadeAuditConfig()
+    sufficient = {
+        "evidence_points": 50,
+        "evidence_density_m2": 0.8,
+        "vertical_bin_coverage": 0.7,
+        "horizontal_bin_coverage": 0.6,
+        "grid_bin_coverage": 0.2,
+        "vertical_span_fraction": 0.8,
+        "p95_distance_m": 0.3,
+    }
+    assert facade_segment_status(sufficient, config) == "sufficient"
+    marginal = sufficient | {
+        "evidence_points": 15,
+        "evidence_density_m2": 0.2,
+        "vertical_bin_coverage": 0.3,
+        "horizontal_bin_coverage": 0.3,
+        "grid_bin_coverage": 0.05,
+        "vertical_span_fraction": 0.4,
+        "p95_distance_m": 0.7,
+    }
+    assert facade_segment_status(marginal, config) == "marginal"
+    assert facade_segment_status(marginal | {"evidence_points": 5}, config) == "insufficient"

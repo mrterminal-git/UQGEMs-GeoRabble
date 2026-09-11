@@ -29,3 +29,7 @@ Phase 11 creates `materials/` containing web-ready orthophoto and procedural fac
 textures, the UV-mapped textured GLB, configuration and hash manifest. These are
 presentation derivatives: observed imagery is used only for terrain and roofs, while
 facades are explicitly schematic and source geometry is unchanged.
+
+The same directory stores `facade_evidence_returns.npz`, a reproducible numeric extract
+of points passing the declared near-wall spatial and vertical filters. It is evidence
+for the Phase 11 audit, not a classified facade point cloud or texture source.

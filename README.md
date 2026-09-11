@@ -178,7 +178,10 @@ conda run --name uq-gis python pipelines/run_phase11.py
 This preserves the analytical Phase 9 scene and creates a presentation skin using the
 2022 public orthophoto on terrain and roofs plus an explicitly schematic facade
 material. Open `reports/scenes/uq_pilot_skin_viewer.html` to switch between the modes.
-The textured scene and GLB retain the unknown-depth utility warning. See
+It also streams the full-resolution 2019 LiDAR to audit facade evidence for all 58
+modelled buildings. No building passes the complete-building gate; 19 are marginal and
+39 insufficient, so no automatic facade reconstruction is performed. The textured
+scene and GLB retain the unknown-depth utility warning. See
 [PHASE11_MATERIALS_AND_TEXTURES.md](PHASE11_MATERIALS_AND_TEXTURES.md).
 
 The same workflow can be run from
@@ -203,5 +206,7 @@ Phase 9 integrates those products into a validated Python/HTML presentation whil
 keeping the utility-depth limitation explicit. Phase 10 provides the consolidated
 reproducibility and integrity evidence. Phase 11 adds switchable analytical and
 presentation skins: 2022 public orthophoto imagery on terrain and roofs, explicitly
-schematic facades, a textured GLB and a self-contained PyVista HTML scene. This result
-can support a request for UQ-controlled or asset-owner utility and BIM material data.
+schematic facades, a textured GLB and a self-contained PyVista HTML scene. Its facade
+audit finds no building with complete enough airborne-LiDAR wall evidence for automatic
+reconstruction. This result can support a request for UQ-controlled or asset-owner
+utility, BIM and facade-imagery data.

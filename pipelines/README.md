@@ -27,4 +27,6 @@ kernel and writes separate executed copies below `reports/tables/phase10_noteboo
 
 Phase 11 creates the orthophoto terrain/roof skin, schematic facade material, textured
 GLB, switchable HTML viewer and fixed visual checks. It leaves all Phase 5/7/8
-authoritative geometry unchanged.
+authoritative geometry unchanged. It also streams the full-resolution LiDAR for an
+all-building facade-evidence screen and detailed review of the five strongest
+candidates; the audit does not create textures or alter walls.

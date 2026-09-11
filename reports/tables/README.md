@@ -24,3 +24,8 @@ notebook copies are retained below `phase10_notebooks/`.
 Phase 11 writes the material provenance inventory, a per-building triangle/UV audit and
 `phase11_skins.json`. The tables distinguish observed roof/terrain imagery from
 procedural facade materials and retain the imagery/LiDAR date mismatch.
+
+The facade addendum writes building and segment evidence tables, the top-five candidate
+table and `phase11_facade_evidence.json`. It records streamed point accounting,
+thresholds, density, coverage, wall-plane residuals, scan angles and vegetation
+interference without claiming that possible near-wall returns are confirmed facades.

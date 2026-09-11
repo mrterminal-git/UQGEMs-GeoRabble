@@ -20,6 +20,7 @@ from matplotlib import font_manager
 from PIL import Image, ImageDraw, ImageFont
 
 from uqgems.acquisition import sha256
+from uqgems.facade_evidence import FacadeAuditConfig, run_facade_evidence_audit
 from uqgems.normalization import LOCAL_ORIGIN, TARGET_EPSG
 from uqgems.skins import (
     SkinConfig,
@@ -31,7 +32,7 @@ from uqgems.skins import (
     save_texture_assets,
 )
 
-PHASE11_SCHEMA_VERSION = 3
+PHASE11_SCHEMA_VERSION = 4
 MATERIAL_REGISTER_FIELDS = (
     "dataset",
     "source_paths",
@@ -63,13 +64,18 @@ def _configuration() -> SkinConfig:
     return SkinConfig()
 
 
-def _signature(sources: dict[str, Path], config: SkinConfig) -> tuple[str, dict[str, Any]]:
+def _signature(
+    sources: dict[str, Path],
+    config: SkinConfig,
+    facade_config: FacadeAuditConfig,
+) -> tuple[str, dict[str, Any]]:
     payload = {
         "schema_version": PHASE11_SCHEMA_VERSION,
         "sources": {name: sha256(path) for name, path in sources.items()},
         "target_epsg": TARGET_EPSG,
         "local_origin": [float(value) for value in LOCAL_ORIGIN],
         "skin_config": asdict(config),
+        "facade_audit_config": asdict(facade_config),
         "source_dates": {
             "orthophoto_capture": "2022-07-24",
             "lidar_capture": "2019",
@@ -222,7 +228,25 @@ def _write_register(
     source_paths = ";".join(_relative(path, root) for path in sources.values())
     source_hashes = ";".join(sha256(path) for path in sources.values())
     rows = []
-    for name in ("textured_glb", "textured_html", "mode_viewer"):
+    output_specs = {
+        "textured_glb": (
+            "planar UV projection and procedural facade tiling",
+            "terrain/roof imagery observed; facades schematic",
+        ),
+        "textured_html": (
+            "planar UV projection and procedural facade tiling",
+            "terrain/roof imagery observed; facades schematic",
+        ),
+        "mode_viewer": (
+            "analysis/presentation viewer assembly",
+            "mode switch preserves observed/schematic distinction",
+        ),
+        "facade_summary": (
+            "streamed near-wall LiDAR evidence audit",
+            "derived geometry evidence only; no RGB texture",
+        ),
+    }
+    for name, (processing, factuality) in output_specs.items():
         path = outputs[name]
         rows.append(
             {
@@ -239,8 +263,8 @@ def _write_register(
                 ),
                 "capture_dates": "LiDAR 2019; orthophoto 2022-07-24",
                 "licence": "orthophoto CC BY 4.0; other source terms retained",
-                "processing": "planar UV projection and procedural facade tiling",
-                "factuality": "terrain/roof imagery observed; facades schematic",
+                "processing": processing,
+                "factuality": factuality,
                 "validation_status": status,
                 "notes": "Presentation derivative only; authoritative Phase 5/7/8 data unchanged.",
             }
@@ -277,6 +301,9 @@ def run_phase11(project_root: str | Path) -> dict[str, Any]:
         "buildings": root / "data/processed/lod2/lod2_buildings.gpkg",
         "building_mesh": root / "data/processed/lod2/uq_pilot_mixed_lod.glb",
         "utilities": root / "data/processed/utilities/uq_pilot_public_utilities.gpkg",
+        "analysis_lidar": (
+            root / "data/interim/phase5/pointcloud/uq_pilot_analysis_filtered.laz"
+        ),
         "analysis_html": root / "reports/scenes/uq_pilot_integrated.html",
         "phase9_summary": root / "reports/tables/phase9_scene.json",
         "phase10_summary": root / "reports/tables/phase10_reproducibility.json",
@@ -291,7 +318,9 @@ def run_phase11(project_root: str | Path) -> dict[str, Any]:
 
     config = _configuration()
     config.validate()
-    signature, signature_payload = _signature(sources, config)
+    facade_config = FacadeAuditConfig()
+    facade_config.validate()
+    signature, signature_payload = _signature(sources, config, facade_config)
     output_root = root / "data/processed/materials"
     outputs = {
         "manifest": output_root / "phase11_manifest.json",
@@ -306,6 +335,15 @@ def run_phase11(project_root: str | Path) -> dict[str, Any]:
         "comparison_figure": root / "reports/figures/phase11_skin_comparison.png",
         "material_inventory": root / "reports/tables/phase11_material_inventory.csv",
         "surface_audit": root / "reports/tables/phase11_building_surface_audit.csv",
+        "facade_buildings": root / "reports/tables/phase11_facade_buildings.csv",
+        "facade_segments": root / "reports/tables/phase11_facade_segments.csv",
+        "facade_top_candidates": (
+            root / "reports/tables/phase11_facade_top_candidates.csv"
+        ),
+        "facade_returns": output_root / "facade_evidence_returns.npz",
+        "facade_overview": root / "reports/figures/phase11_facade_evidence_overview.png",
+        "facade_details": root / "reports/figures/phase11_facade_evidence_top5.png",
+        "facade_summary": root / "reports/tables/phase11_facade_evidence.json",
         "summary": root / "reports/tables/phase11_skins.json",
     }
     controlled_names = tuple(name for name in outputs if name not in {"manifest", "summary"})
@@ -326,6 +364,7 @@ def run_phase11(project_root: str | Path) -> dict[str, Any]:
     data = load_skinned_scene_data(root)
     if cache_reused:
         surface_audit = pd.read_csv(outputs["surface_audit"])
+        facade_summary = json.loads(outputs["facade_summary"].read_text(encoding="utf-8"))
     else:
         save_texture_assets(
             data.orthophoto_rgb,
@@ -369,6 +408,21 @@ def run_phase11(project_root: str | Path) -> dict[str, Any]:
         )
         inventory = _material_inventory(root, outputs)
         inventory.to_csv(outputs["material_inventory"], index=False)
+        facade_paths = {
+            "buildings": outputs["facade_buildings"],
+            "segments": outputs["facade_segments"],
+            "top_candidates": outputs["facade_top_candidates"],
+            "returns": outputs["facade_returns"],
+            "overview": outputs["facade_overview"],
+            "details": outputs["facade_details"],
+        }
+        facade_summary = run_facade_evidence_audit(
+            data.integrated.buildings,
+            sources["analysis_lidar"],
+            facade_paths,
+            facade_config,
+        )
+        _write_json(outputs["facade_summary"], facade_summary)
         _write_json(outputs["config"], signature_payload)
 
     with rasterio.open(sources["orthophoto"]) as imagery, rasterio.open(
@@ -403,7 +457,13 @@ def run_phase11(project_root: str | Path) -> dict[str, Any]:
     inventory = pd.read_csv(outputs["material_inventory"])
     original_utilities = data.integrated.utilities
     png_info = {}
-    for name in ("plan_figure", "oblique_figure", "comparison_figure"):
+    for name in (
+        "plan_figure",
+        "oblique_figure",
+        "comparison_figure",
+        "facade_overview",
+        "facade_details",
+    ):
         with Image.open(outputs[name]) as image:
             png_info[name] = {
                 "width": image.width,
@@ -483,17 +543,36 @@ def run_phase11(project_root: str | Path) -> dict[str, Any]:
         "all_fixed_figures_are_nonempty": all(
             info["bytes"] > 25_000 for info in png_info.values()
         ),
+        "facade_evidence_addendum_passed": facade_summary["status"] == "passed",
+        "facade_audit_screened_all_58_buildings": (
+            facade_summary["screened_buildings"] == 58
+        ),
+        "facade_audit_streamed_complete_analysis_cloud": (
+            facade_summary["point_cloud"]["chunks"] > 1
+            and facade_summary["point_cloud"]["header_point_count"]
+            == facade_summary["point_cloud"]["scanned_points"]
+        ),
+        "facade_audit_confirms_no_rgb": not facade_summary["point_cloud"][
+            "rgb_dimensions_present"
+        ],
+        "facade_audit_ranks_five_detailed_candidates": (
+            len(facade_summary["top_candidates"]) == 5
+        ),
         "phase9_analysis_scene_is_unchanged": sha256(sources["analysis_html"])
         == analysis_hash_before,
     }
 
     status = "passed" if all(checks.values()) else "failed"
     register = _write_register(root, sources, outputs, status)
+    facade_status_counts = facade_summary["building_status_counts"]
     summary = {
         "phase": 11,
         "status": status,
         "cache_reused": cache_reused,
-        "scope": "presentation skins for the 500 m by 500 m UQ St Lucia pilot",
+        "scope": (
+            "presentation skins and facade evidence for the 500 m by 500 m "
+            "UQ St Lucia pilot"
+        ),
         "skin_modes": {
             "analysis": "unchanged Phase 9 LoD/confidence colours and GIS interaction",
             "presentation": (
@@ -525,18 +604,26 @@ def run_phase11(project_root: str | Path) -> dict[str, Any]:
             "roof_uv_range": [roof_uv_min, roof_uv_max],
             "facade_texture_pixels": list(facade_size),
         },
+        "facade_evidence_audit": facade_summary,
         "png_validation": png_info,
         "software": _software_versions(),
         "checks": checks,
         "decision_gate": (
             "The hybrid presentation skin is ready for local demonstration alongside the "
-            "unchanged analysis scene. It does not provide observed facade materials or "
-            "authoritative utility depths."
+            "unchanged analysis scene. The airborne-LiDAR facade audit found "
+            f"{facade_status_counts.get('sufficient', 0)} sufficient, "
+            f"{facade_status_counts.get('marginal', 0)} marginal and "
+            f"{facade_status_counts.get('insufficient', 0)} insufficient buildings. "
+            "It does not provide observed facade materials or authoritative utility depths."
         ),
         "limitations": [
             "The 2022 orthophoto and 2019 LiDAR may disagree where the campus changed.",
             "Facade windows and panels are procedural and do not depict actual buildings.",
             "Nadir imagery cannot provide real facade photography.",
+            (
+                "Near-footprint LiDAR returns may include roof edges or nearby objects; "
+                "only targeted manual wall-plane refinement is permitted by the audit."
+            ),
             "Roof texture quality is constrained by Phase 7 geometry and source-image visibility.",
             "Public utilities remain sparse, 2D and physical depth is unknown.",
             "Urban Utilities redistribution terms must be confirmed before publication.",

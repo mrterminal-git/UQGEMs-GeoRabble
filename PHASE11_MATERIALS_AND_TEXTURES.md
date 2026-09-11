@@ -12,7 +12,8 @@ panel-and-window material because nadir imagery and LiDAR do not observe facade
 appearance. Public utilities retain their Phase 9 network colours and display-only
 terrain drape; physical depth remains unknown.
 
-All 21 Phase 11 validation checks pass.
+The phase now also includes a full-resolution airborne-LiDAR facade-evidence audit.
+All 26 Phase 11 validation checks pass.
 
 ## Skin modes
 
@@ -48,6 +49,54 @@ The exported GLB also includes the three sparse Phase 8 utility records as colou
 dashed display geometry. Their object names contain `DISPLAY_ONLY_DEPTH_UNKNOWN` so
 the limitation survives outside the HTML wrapper.
 
+## Facade-evidence audit
+
+The audit screens all 58 modelled buildings and 586 footprint-wall segments against
+the 2019 full-resolution analysis cloud. It streams all 6,473,167 points in 13 chunks.
+For each wall it:
+
+1. searches within 0.75 m of the footprint segment;
+2. excludes the lowest 0.75 m and highest 1.0 m of the wall interval to reduce ground
+   and roof-edge contamination;
+3. treats LAS classes 1 and 6 as possible geometry evidence;
+4. records classes 3, 4 and 5 as vegetation interference;
+5. assigns each return to its nearest wall segment; and
+6. measures point density, horizontal and vertical coverage, two-dimensional grid
+   coverage, distance from the wall plane and scan angle.
+
+The point cloud contains XYZ, classification, intensity and scan angle, but no red,
+green or blue channels. The audit therefore tests support for wall geometry only; it
+cannot produce facade photography or observed materials.
+
+The screen found 54,285 possible geometry returns and 36,715 vegetation returns in the
+declared near-wall intervals. This does not mean that every possible return is a wall:
+roof edges, ledges and nearby objects can remain. The conservative decision gates give:
+
+| Evidence status | Buildings | Wall segments |
+|---|---:|---:|
+| Sufficient | 0 | 6 |
+| Marginal | 19 | 112 |
+| Insufficient | 39 | 468 |
+
+No building has sufficiently complete evidence across multiple sides for automated
+facade reconstruction. The five strongest marginal candidates are:
+
+| Rank | Building | ID | Score | Possible returns | Density |
+|---:|---|---|---:|---:|---:|
+| 1 | Richards Building | UQSL-030 | 87.586 | 1,618 | 1.14 points/m2 |
+| 2 | Goddard Building | UQSL-028 | 85.902 | 2,483 | 1.25 points/m2 |
+| 3 | Parnell Building | UQSL-033 | 85.367 | 2,214 | 1.02 points/m2 |
+| 4 | Priestley Building | UQSL-041 | 82.469 | 2,630 | 1.27 points/m2 |
+| 5 | Gordon Greenwood Building | UQSL-014 | 82.238 | 2,452 | 0.97 points/m2 |
+
+These buildings are candidates for manual cross-section inspection only. The audit
+does not authorise automatically moving walls, adding architectural details or
+replacing the schematic facade skin.
+
+The 0-100 score is only a relative ranking within this pilot; it is not a probability
+or confidence percentage. The categorical sufficiency gates take precedence over the
+ranking score.
+
 ## Outputs
 
 Primary presentation outputs:
@@ -73,6 +122,8 @@ Fixed visual checks:
 reports/figures/phase11_textured_plan.png
 reports/figures/phase11_textured_oblique.png
 reports/figures/phase11_skin_comparison.png
+reports/figures/phase11_facade_evidence_overview.png
+reports/figures/phase11_facade_evidence_top5.png
 ```
 
 Validation evidence:
@@ -80,7 +131,12 @@ Validation evidence:
 ```text
 reports/tables/phase11_material_inventory.csv
 reports/tables/phase11_building_surface_audit.csv
+reports/tables/phase11_facade_buildings.csv
+reports/tables/phase11_facade_segments.csv
+reports/tables/phase11_facade_top_candidates.csv
+reports/tables/phase11_facade_evidence.json
 reports/tables/phase11_skins.json
+data/processed/materials/facade_evidence_returns.npz
 data/material_model_register.csv
 ```
 
@@ -106,6 +162,8 @@ twin:
 - roofs inherit every accepted or fallback limitation in the Phase 7 geometry;
 - facade windows, panels and materials are illustrative rather than observed;
 - nadir imagery cannot provide true facade photographs;
+- no building passed the complete-building facade-evidence gate;
+- near-footprint returns can include roof edges, ledges or nearby objects;
 - public utility coverage is sparse and physical depth is unknown; and
 - the model is not survey-grade or excavation-safe.
 
@@ -116,6 +174,8 @@ or a derivative utility dataset.
 ## Decision gate
 
 The hybrid skin is ready for local demonstrations alongside the unchanged analytical
-scene. A later authoritative visual upgrade should use UQ BIM material assets or
-appropriately licensed oblique/facade imagery rather than treating the procedural
-facades as observations.
+scene. The five strongest LiDAR candidates justify targeted manual wall-plane review,
+but the evidence does not justify unattended facade reconstruction. A later
+authoritative visual upgrade should use UQ BIM material assets or appropriately
+licensed oblique/facade imagery rather than treating the procedural facades as
+observations.
