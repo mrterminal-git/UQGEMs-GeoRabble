@@ -1,0 +1,5 @@
+.DS_Store
+
+# Downloaded Translink GTFS data. Keep only the instructions in Git.
+SEQ_GTFS/*
+!SEQ_GTFS/README.md
