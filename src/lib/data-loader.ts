@@ -15,7 +15,7 @@ export interface RegionData {
 
 export async function loadRegionData(
 	type: RegionType,
-	cityCode: CityCode = 'blr'
+	cityCode: CityCode = 'brisbane'
 ): Promise<RegionData> {
 	const dataPath = `/data/${cityCode}`;
 	const regionFile = type === 'wards' ? 'wards.json' : 'hexagons.json';
@@ -39,7 +39,7 @@ export async function loadRegionData(
 
 let routesCache: Record<string, Record<string, Route>> = {};
 
-export async function loadRoutes(cityCode: CityCode = 'blr'): Promise<Record<string, Route>> {
+export async function loadRoutes(cityCode: CityCode = 'brisbane'): Promise<Record<string, Route>> {
 	if (routesCache[cityCode]) {
 		return routesCache[cityCode];
 	}
@@ -52,7 +52,7 @@ let cacheIndexCache: Record<string, Record<string, string>> = {};
 
 async function loadCacheIndex(
 	type: RegionType,
-	cityCode: CityCode = 'blr'
+	cityCode: CityCode = 'brisbane'
 ): Promise<Record<string, string>> {
 	const cacheKey = `${cityCode}-${type}`;
 	if (cacheIndexCache[cacheKey]) {
@@ -81,7 +81,7 @@ export async function loadConnectingRoutes(
 	type: RegionType,
 	fromRegionId: string,
 	toRegionId: string,
-	cityCode: CityCode = 'blr'
+	cityCode: CityCode = 'brisbane'
 ): Promise<Route[]> {
 	try {
 		const index = await loadCacheIndex(type, cityCode);
@@ -128,7 +128,7 @@ let globalMaxScoreCache: Record<string, number> = {};
 
 export async function loadGlobalMaxScore(
 	type: RegionType,
-	cityCode: CityCode = 'blr'
+	cityCode: CityCode = 'brisbane'
 ): Promise<number> {
 	const cacheKey = `${cityCode}-${type}`;
 	if (globalMaxScoreCache[cacheKey] !== undefined) {
@@ -137,7 +137,9 @@ export async function loadGlobalMaxScore(
 	try {
 		const response = await fetch(`/data/${cityCode}/${connectivityDir(type)}/meta.json`);
 		const meta = await response.json();
-		globalMaxScoreCache[cacheKey] = meta.globalMaxScore ? toDirectionalCount(meta.globalMaxScore) : 1;
+		globalMaxScoreCache[cacheKey] = meta.globalMaxScore
+			? toDirectionalCount(meta.globalMaxScore)
+			: 1;
 	} catch {
 		globalMaxScoreCache[cacheKey] = 1;
 	}
@@ -146,7 +148,7 @@ export async function loadGlobalMaxScore(
 
 async function loadConnectivityIndex(
 	type: RegionType,
-	cityCode: CityCode = 'blr'
+	cityCode: CityCode = 'brisbane'
 ): Promise<Record<string, string>> {
 	const cacheKey = `${cityCode}-${type}`;
 	if (connectivityIndexCache[cacheKey]) {
@@ -160,7 +162,7 @@ async function loadConnectivityIndex(
 export async function loadRegionConnectivity(
 	type: RegionType,
 	regionId: string,
-	cityCode: CityCode = 'blr'
+	cityCode: CityCode = 'brisbane'
 ): Promise<Record<string, number>> {
 	try {
 		const index = await loadConnectivityIndex(type, cityCode);
@@ -180,7 +182,7 @@ export async function loadRegionConnectivity(
 }
 
 export async function loadRoutesGeojson(
-	cityCode: CityCode = 'blr'
+	cityCode: CityCode = 'brisbane'
 ): Promise<GeoJSON.FeatureCollection | null> {
 	try {
 		const response = await fetch(`/data/${cityCode}/routes.geojson`);

@@ -26,7 +26,7 @@
 
 <SEO
 	title={cityConfig.siteName}
-	description="Visualize the public transport network and connectivity between various areas of {cityConfig.name}."
+	description="Explore direct public-transport connectivity between H3 areas and council wards in Brisbane."
 />
 
 {@render children()}

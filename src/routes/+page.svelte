@@ -27,7 +27,6 @@
 	import SelectedRegionInfo from '$lib/components/SelectedRegionInfo.svelte';
 	import RegionList from '$lib/components/RegionList.svelte';
 	import RoutesPanel from '$lib/components/RoutesPanel.svelte';
-	import CitySelector from '$lib/components/CitySelector.svelte';
 
 	let map: Map | null = null;
 	let mapContainer: HTMLDivElement;
@@ -188,34 +187,6 @@
 		}
 	}
 
-	async function handleCityChange(newCity: CityCode) {
-		if (map) {
-			map.remove();
-			map = null;
-		}
-
-		currentCity = newCity;
-		selectedWard = null;
-		selectedConnectedWard = null;
-		hoveredConnectedWard = null;
-		connectivityScores = [];
-		connectingRoutes = [];
-		wardsData = null;
-		areasData = null;
-		geojsonData = null;
-		wards = [];
-		routesGeojson = null;
-		selectedRouteId = null;
-
-		const config = getCityConfig(newCity);
-		regionType = config.supportedRegions.includes('hexagons')
-			? 'hexagons'
-			: config.supportedRegions[0] || 'hexagons';
-
-		loading = true;
-		await initializeApp();
-	}
-
 	function schedulePrefetch() {
 		// Defer prefetch of the other region type so it doesn't compete with the
 		// first interaction for CPU/network right after load.
@@ -336,16 +307,7 @@
 			showSearchResults = false;
 			handleSelectRoute(null);
 
-			updateMapHighlighting(
-				map,
-				regionType,
-				null,
-				null,
-				null,
-				[],
-				globalMaxScore,
-				cityConfig
-			);
+			updateMapHighlighting(map, regionType, null, null, null, [], globalMaxScore, cityConfig);
 			return;
 		}
 
@@ -663,8 +625,7 @@
 					class="text-sm font-bold text-black flex items-center gap-2 flex-wrap"
 					style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; letter-spacing: 0.35px;"
 				>
-					<CitySelector {currentCity} onCityChange={handleCityChange} />
-					<span>TRANSIT AFFINITY</span>
+					<span>BRISBANE TRANSIT AFFINITY</span>
 				</h1>
 
 				<div class="flex items-center gap-2 shrink-0">
@@ -753,7 +714,7 @@
 				class="p-4 text-black text-sm"
 				style="font-family: ui-sans-serif, system-ui, sans-serif;"
 			>
-				Select a {regionType === 'wards' ? 'ward' : 'area'} to see it's affinity to other
+				Select a {regionType === 'wards' ? 'ward' : 'area'} to see its affinity to other
 				{regionType === 'wards' ? 'wards' : 'areas'}.
 			</div>
 		{/if}
@@ -805,7 +766,7 @@
 				class="mb-3 pr-6 text-sm font-bold text-black"
 				style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; letter-spacing: 0.35px;"
 			>
-				ABOUT TRANSIT AFFINITY
+				ABOUT BRISBANE TRANSIT AFFINITY
 			</h2>
 
 			<div
@@ -813,27 +774,24 @@
 				style="font-family: ui-sans-serif, system-ui, sans-serif;"
 			>
 				<p>
-					Transit Affinity visualizes the public transport network and connectivity between 
-					various areas of a city.
+					Brisbane Transit Affinity visualizes direct public-transport connectivity within the
+					Brisbane City Council local government area.
 				</p>
 				<p>
-					Stops and schedules are taken from GTFS data, then mapped onto a grid of H3
-					hexagon areas or wards. For each pair of areas, a score is computed based on
-					the number of daily transit trips that directly connect the areas. Areas
-					linked by more frequent direct routes score higher. These areas are considered
-					to have higher transit affinity.
+					Stops and Wednesday schedules are taken from Translink GTFS data, then mapped onto H3
+					resolution 8 hexagons or Brisbane's 26 council wards. For each pair of areas, the score
+					counts scheduled direct trips connecting them. Bus, train, light rail and ferry routes use
+					the same scoring rules.
 				</p>
 				<p>
-					Select any area on the map to see its connectedness or affinity to the rest of
-					the city, color-coded from low (red) to high (green).
+					Select any area on the map to see its connectedness or affinity to the rest of the city,
+					color-coded from low (red) to high (green).
 				</p>
-				<p>
-					Select a paired area to view the routes that connect the two areas together.
-				</p>
+				<p>Select a paired area to view the routes that connect the two areas together.</p>
 			</div>
 
 			<a
-				href="https://github.com/Vonter/transit-affinity"
+				href="https://github.com/mrterminal-git/UQGEMs-GeoRabble"
 				target="_blank"
 				rel="noopener noreferrer"
 				class="mt-4 inline-flex items-center gap-2 rounded border border-black/30 px-3 py-1.5 text-xs font-bold text-black hover:bg-black/5 transition-colors"
