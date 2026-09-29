@@ -31,13 +31,16 @@ except ImportError:
 
 # Isochrone generation
 try:
-    from shapely.geometry import MultiPoint, Point, LineString
+    from shapely.geometry import MultiPoint, Point, LineString, shape
+    from shapely.ops import unary_union
     SHAPELY_AVAILABLE = True
 except ImportError:
     SHAPELY_AVAILABLE = False
     MultiPoint = None
     Point = None
     LineString = None
+    shape = None
+    unary_union = None
 
 # NetworkX is no longer used - removed dependency
 
@@ -112,6 +115,24 @@ def haversine_km(lon1: float, lat1: float, lon2: float, lat2: float) -> float:
     return 2 * 6371.0 * asin(sqrt(a))
 
 
+def _prune_gtfs_to_stops(
+    kept_stops: Dict[str, Dict], routes: List[Dict], trips: List[Dict],
+    stop_times_by_trip: Dict[str, List[Dict]]
+) -> Tuple[List[Dict], List[Dict], Dict[str, List[Dict]], Dict[str, Dict]]:
+    """Keep trips with at least two retained stops and their associated routes."""
+    new_stop_times: Dict[str, List[Dict]] = {}
+    for trip_id, stop_times in stop_times_by_trip.items():
+        filtered = [st for st in stop_times if st.get('stop_id') in kept_stops]
+        if len(filtered) >= 2:
+            new_stop_times[trip_id] = filtered
+
+    kept_trip_ids = set(new_stop_times)
+    new_trips = [t for t in trips if t.get('trip_id') in kept_trip_ids]
+    kept_route_ids = {t.get('route_id') for t in new_trips}
+    new_routes = [r for r in routes if r.get('route_id') in kept_route_ids]
+    return new_routes, new_trips, new_stop_times, kept_stops
+
+
 def crop_gtfs_by_radius(
     center: Tuple[float, float], radius_km: float,
     routes: List[Dict], trips: List[Dict],
@@ -130,16 +151,9 @@ def crop_gtfs_by_radius(
         if haversine_km(clon, clat, s['stop_lon'], s['stop_lat']) <= radius_km
     }
 
-    new_stop_times: Dict[str, List[Dict]] = {}
-    for trip_id, stop_times in stop_times_by_trip.items():
-        filtered = [st for st in stop_times if st.get('stop_id') in kept_stops]
-        if len(filtered) >= 2:
-            new_stop_times[trip_id] = filtered
-
-    kept_trip_ids = set(new_stop_times.keys())
-    new_trips = [t for t in trips if t.get('trip_id') in kept_trip_ids]
-    kept_route_ids = {t.get('route_id') for t in new_trips}
-    new_routes = [r for r in routes if r.get('route_id') in kept_route_ids]
+    new_routes, new_trips, new_stop_times, kept_stops = _prune_gtfs_to_stops(
+        kept_stops, routes, trips, stop_times_by_trip
+    )
 
     print(
         f"Cropped GTFS to {radius_km}km radius: "
@@ -148,6 +162,60 @@ def crop_gtfs_by_radius(
         f"routes {len(routes)}->{len(new_routes)}"
     )
     return new_routes, new_trips, new_stop_times, kept_stops
+
+
+def load_boundary_geometry(geojson_path: Path):
+    """Load and union every polygonal feature from a GeoJSON boundary file."""
+    if not SHAPELY_AVAILABLE:
+        raise ImportError("shapely is required for polygon boundary processing")
+    document = load_geojson(str(geojson_path))
+    geometries = []
+    for feature in document.get('features', []):
+        geometry = feature.get('geometry')
+        if geometry and geometry.get('type') in {'Polygon', 'MultiPolygon'}:
+            geometries.append(shape(geometry))
+    if not geometries:
+        raise ValueError(f"No polygon geometry found in {geojson_path}")
+    boundary = unary_union(geometries)
+    if boundary.is_empty or not boundary.is_valid:
+        raise ValueError(f"Invalid boundary geometry in {geojson_path}")
+    return boundary
+
+
+def crop_gtfs_by_boundary(
+    boundary, routes: List[Dict], trips: List[Dict],
+    stop_times_by_trip: Dict[str, List[Dict]], stops_data: Dict[str, Dict]
+) -> Tuple[List[Dict], List[Dict], Dict[str, List[Dict]], Dict[str, Dict]]:
+    """Restrict GTFS data to stops covered by a polygon or multipolygon."""
+    if not SHAPELY_AVAILABLE:
+        raise ImportError("shapely is required for polygon boundary processing")
+    kept_stops = {
+        stop_id: stop
+        for stop_id, stop in stops_data.items()
+        if boundary.covers(Point(stop['stop_lon'], stop['stop_lat']))
+    }
+    new_routes, new_trips, new_stop_times, kept_stops = _prune_gtfs_to_stops(
+        kept_stops, routes, trips, stop_times_by_trip
+    )
+    print(
+        "Cropped GTFS to polygon boundary: "
+        f"stops {len(stops_data)}->{len(kept_stops)}, "
+        f"trips {len(trips)}->{len(new_trips)}, "
+        f"routes {len(routes)}->{len(new_routes)}"
+    )
+    return new_routes, new_trips, new_stop_times, kept_stops
+
+
+def filter_h3_cells_by_boundary(cells: Set[str], boundary) -> Set[str]:
+    """Keep H3 cells whose centroid is covered by a boundary geometry."""
+    if boundary is None:
+        return set(cells)
+    kept = set()
+    for cell in cells:
+        lat, lon = cell_to_latlng(cell)
+        if boundary.covers(Point(lon, lat)):
+            kept.add(cell)
+    return kept
 
 
 def save_json(data: Any, path: Path) -> None:
@@ -307,16 +375,19 @@ def calculate_polygon_centroid(polygon_coords: List[List[List[float]]]) -> Tuple
 
 def map_stops_to_wards(stops: Iterator[Dict], geojson: Dict) -> Dict[str, Set[str]]:
     """Map each stop to the ward(s) it belongs to."""
-    ward_stops: Dict[str, Set[str]] = defaultdict(set)
-    
-    ward_polygons: Dict[str, Tuple[List[List[List[float]]], Tuple[float, float, float, float]]] = {}
+    if not SHAPELY_AVAILABLE:
+        raise ImportError("shapely is required for ward processing")
+
+    ward_stops: Dict[str, Set[str]] = {}
+    ward_polygons: Dict[str, Any] = {}
     for feature in geojson.get('features', []):
-        if feature['geometry']['type'] != 'Polygon':
+        geometry = feature.get('geometry')
+        if not geometry or geometry.get('type') not in {'Polygon', 'MultiPolygon'}:
             continue
         ward_id = feature['properties'].get('namecol', '')
         if ward_id:
-            polygon_coords = feature['geometry']['coordinates']
-            ward_polygons[ward_id] = (polygon_coords, get_polygon_bounds(polygon_coords))
+            ward_stops[ward_id] = set()
+            ward_polygons[ward_id] = shape(geometry)
     
     for stop in stops:
         try:
@@ -325,11 +396,20 @@ def map_stops_to_wards(stops: Iterator[Dict], geojson: Dict) -> Dict[str, Set[st
         except (ValueError, KeyError):
             continue
         
-        for ward_id, (polygon_coords, bounds) in ward_polygons.items():
-            if point_in_polygon(lon, lat, polygon_coords, bounds):
+        point = Point(lon, lat)
+        for ward_id, polygon in ward_polygons.items():
+            if polygon.covers(point):
                 ward_stops[ward_id].add(stop_id)
-    
-    return dict(ward_stops)
+
+    return ward_stops
+
+
+def calculate_geojson_geometry_center(geometry: Dict) -> Tuple[float, float]:
+    """Return an interior display point for a Polygon or MultiPolygon."""
+    if not SHAPELY_AVAILABLE:
+        raise ImportError("shapely is required for geometry centroid processing")
+    point = shape(geometry).representative_point()
+    return point.x, point.y
 
 def map_stops_to_h3_hexagons(stops: Iterator[Dict], resolution: int = 8) -> Tuple[Dict[str, Set[str]], Dict[str, Dict]]:
     """Map each stop to h3 hexagon(s) it belongs to."""

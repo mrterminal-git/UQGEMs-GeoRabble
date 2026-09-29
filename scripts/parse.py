@@ -6,10 +6,12 @@ Calls processing functions directly to avoid reloading GTFS data.
 
 import sys
 import shutil
+import json
 from pathlib import Path
 
 from utils import (load_multiple_gtfs_data, discover_gtfs_files, calculate_stop_connectivity,
-                   save_json, crop_gtfs_by_radius)
+                   save_json, crop_gtfs_by_radius, crop_gtfs_by_boundary,
+                   load_boundary_geometry)
 from process_wards import process_wards
 from process_hexagons import process_hexagons
 from process_isochrones import process_stop_isochrones
@@ -53,6 +55,42 @@ def save_basic_gtfs_data(routes: list, trips: list, stop_times_by_trip: dict,
     trip_stop_ids = build_trip_stop_ids(stop_times_by_trip)
     stop_connectivity = calculate_stop_connectivity(trip_stop_ids, stop_times_by_trip)
     save_json(stop_connectivity, output_dir / 'stop_connectivity.json')
+
+
+def save_build_metadata(city_code: str, hexagon_resolution: int,
+                        routes: list, trips: list, stops_data: dict,
+                        gtfs_paths: list[Path], data_dir: Path,
+                        crop_boundary_path: Path | None,
+                        wards_path: Path | None) -> None:
+    """Record the exact source snapshots and processing choices for this build."""
+    metadata = {
+        'city_code': city_code,
+        'h3_resolution': hexagon_resolution,
+        'representative_day': 'wednesday',
+        'scoring_model': 'direct trips with equal mode weighting',
+        'gtfs_archives': [path.name for path in gtfs_paths],
+        'crop_boundary': str(crop_boundary_path) if crop_boundary_path else None,
+        'wards': str(wards_path) if wards_path else None,
+        'processed_counts': {
+            'routes': len(routes),
+            'trips': len(trips),
+            'stops': len(stops_data),
+        },
+    }
+
+    if len(gtfs_paths) == 1:
+        source_metadata = gtfs_paths[0].parent / 'download_metadata.json'
+        if source_metadata.exists():
+            metadata['gtfs_source'] = json.loads(source_metadata.read_text(encoding='utf-8'))
+
+    if crop_boundary_path:
+        boundary_metadata = crop_boundary_path.parent / 'brisbane_boundaries_metadata.json'
+        if boundary_metadata.exists():
+            metadata['boundary_source'] = json.loads(
+                boundary_metadata.read_text(encoding='utf-8')
+            )
+
+    save_json(metadata, data_dir / 'build_metadata.json')
 
 
 def split_connectivity_matrix(matrix_path: Path, chunks_dir: Path):
@@ -186,6 +224,7 @@ def main():
     #   to stops within R km of the center, shrinking the map extent and outputs.
     crop_radius_km = extract_float_flag('--crop-radius-km', None)
     crop_center_arg = extract_str_flag('--crop-center', None)
+    crop_boundary_arg = extract_str_flag('--crop-boundary', None)
     crop_center = None
     if crop_radius_km and crop_center_arg:
         lon_str, lat_str = crop_center_arg.split(',')
@@ -194,10 +233,22 @@ def main():
         print("Error: --crop-radius-km requires --crop-center \"<lon>,<lat>\"")
         sys.exit(1)
 
+    crop_boundary_path = Path(crop_boundary_arg) if crop_boundary_arg else None
+    if crop_boundary_path and (crop_radius_km or crop_center_arg):
+        print("Error: --crop-boundary cannot be combined with radius cropping")
+        sys.exit(1)
+    if crop_boundary_path and not crop_boundary_path.exists():
+        print(f"Error: crop boundary not found: {crop_boundary_path}")
+        sys.exit(1)
+    boundary_geometry = (
+        load_boundary_geometry(crop_boundary_path) if crop_boundary_path else None
+    )
+
     # Parse arguments
     if len(sys.argv) < 2:
         print("Usage: python parse.py <gtfs_dir> [city_code] [<geojson_path>] [<hexagon_resolution>]")
-        print("       [--hex-buffer N] [--prune-below N] [--crop-radius-km R --crop-center \"<lon>,<lat>\"]")
+        print("       [--hex-buffer N] [--prune-below N] [--crop-boundary <geojson_path>]")
+        print("       [--crop-radius-km R --crop-center \"<lon>,<lat>\"]")
         print("Example: python parse.py scripts/gtfs blr scripts/geojson/blr.geojson 8")
         print("BLR (35km crop):  python parse.py scripts/gtfs blr scripts/geojson/blr.geojson 8 \\")
         print("                    --crop-radius-km 35 --crop-center \"77.5946,12.9716\" \\")
@@ -263,8 +314,17 @@ def main():
             crop_center, crop_radius_km, routes, trips, stop_times_by_trip, stops_data)
         gtfs_data = {'routes': routes, 'trips': trips,
                      'stop_times': stop_times_by_trip, 'stops': stops_data}
+    elif boundary_geometry is not None:
+        routes, trips, stop_times_by_trip, stops_data = crop_gtfs_by_boundary(
+            boundary_geometry, routes, trips, stop_times_by_trip, stops_data)
+        gtfs_data = {'routes': routes, 'trips': trips,
+                     'stop_times': stop_times_by_trip, 'stops': stops_data}
 
     save_basic_gtfs_data(routes, trips, stop_times_by_trip, stops_data, data_dir)
+    save_build_metadata(
+        city_code, hexagon_resolution, routes, trips, stops_data, gtfs_paths,
+        data_dir, crop_boundary_path, geojson_path
+    )
     
     # Step 1: Process wards (if GeoJSON provided)
     if geojson_path:
@@ -279,7 +339,8 @@ def main():
     print(f"STEP 2: Processing hexagons for {city_code}")
     print("="*60)
     process_hexagons(data_dir, routes, trips, stop_times_by_trip, stops_data,
-                     hexagon_resolution, buffer_rings=hex_buffer, prune_below=prune_below)
+                     hexagon_resolution, buffer_rings=hex_buffer, prune_below=prune_below,
+                     boundary_geometry=boundary_geometry)
     
     # Step 3: Process isochrones
     if skip_isochrones:
@@ -305,7 +366,9 @@ def main():
     print(f"STEP 4: Generating routes GeoJSON for {city_code}")
     print("="*60)
     generate_routes_geojson(gtfs_paths, data_dir / 'routes.geojson',
-                            crop_center=crop_center, crop_radius_km=crop_radius_km)
+                            crop_center=crop_center, crop_radius_km=crop_radius_km,
+                            boundary_geometry=boundary_geometry,
+                            included_route_ids={route['route_id'] for route in routes})
 
     # Step 5: Split cache files
     print("\n" + "="*60)

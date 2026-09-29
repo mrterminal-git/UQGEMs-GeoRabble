@@ -10,7 +10,7 @@ from typing import Dict, Set
 from utils import (
     load_geojson, save_json, save_geojson,
     map_stops_to_wards, calculate_connectivity_matrix,
-    calculate_polygon_centroid, build_routes_cache
+    calculate_geojson_geometry_center, build_routes_cache
 )
 
 
@@ -66,16 +66,17 @@ def process_wards(geojson_path: Path, output_dir: Path,
     print("Building wards list...")
     wards_list = []
     for feature in geojson.get('features', []):
-        if feature['geometry']['type'] != 'Polygon':
+        geometry = feature.get('geometry')
+        if not geometry or geometry.get('type') not in {'Polygon', 'MultiPolygon'}:
             continue
         
         ward_id = feature['properties'].get('namecol', '')
         if not ward_id:
             continue
         
-        # Calculate centroid from polygon
-        polygon_coords = feature['geometry']['coordinates']
-        centroid_lon, centroid_lat = calculate_polygon_centroid(polygon_coords)
+        # Use an interior point so MultiPolygon wards and concave wards always
+        # focus the map on a location within the selected ward.
+        centroid_lon, centroid_lat = calculate_geojson_geometry_center(geometry)
         
         # Get stop count
         stop_count = len(ward_stops.get(ward_id, set()))

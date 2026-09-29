@@ -16,6 +16,8 @@ import json
 from pathlib import Path
 from collections import defaultdict
 
+from shapely.geometry import LineString
+
 from utils import discover_gtfs_files, save_json, haversine_km
 
 
@@ -65,6 +67,27 @@ def clip_line_to_radius(coords, center, radius_km):
     return runs
 
 
+def clip_line_to_geometry(coords, boundary_geometry):
+    """Clip a polyline to a polygon and return its LineString coordinate runs."""
+    clipped = LineString(coords).intersection(boundary_geometry)
+    runs = []
+
+    def collect_lines(geometry):
+        if geometry.is_empty:
+            return
+        if geometry.geom_type == 'LineString':
+            run = [(round(lon, 6), round(lat, 6)) for lon, lat in geometry.coords]
+            if len(run) >= 2:
+                runs.append(run)
+            return
+        if hasattr(geometry, 'geoms'):
+            for child in geometry.geoms:
+                collect_lines(child)
+
+    collect_lines(clipped)
+    return runs
+
+
 def load_csv_from_zip(zip_path, filename):
     rows = []
     with zipfile.ZipFile(zip_path, 'r') as zf:
@@ -107,7 +130,8 @@ def simplify_coords(coords, tolerance):
 
 
 def generate_routes_geojson(gtfs_paths, output_path, tolerance=0.0001, min_trips=5,
-                            crop_center=None, crop_radius_km=None):
+                            crop_center=None, crop_radius_km=None,
+                            boundary_geometry=None, included_route_ids=None):
     routes_by_id = {}
     trip_to_route = {}
     trip_to_shape = {}
@@ -154,6 +178,8 @@ def generate_routes_geojson(gtfs_paths, output_path, tolerance=0.0001, min_trips
     # For each route, pick the shape with the most points (most detailed)
     route_best_shape = {}
     for rid, shape_ids in route_shapes.items():
+        if included_route_ids is not None and rid not in included_route_ids:
+            continue
         if route_trip_count[rid] < min_trips:
             continue
         best = max(shape_ids, key=lambda sid: len(shapes.get(sid, [])))
@@ -178,7 +204,16 @@ def generate_routes_geojson(gtfs_paths, output_path, tolerance=0.0001, min_trips
             'route_long_name': route_info.get('route_long_name', ''),
         }
 
-        if crop_radius_km and crop_center:
+        if boundary_geometry is not None:
+            runs = clip_line_to_geometry(coords, boundary_geometry)
+            if not runs:
+                continue
+            total_points_after += sum(len(r) for r in runs)
+            if len(runs) == 1:
+                geometry = {'type': 'LineString', 'coordinates': runs[0]}
+            else:
+                geometry = {'type': 'MultiLineString', 'coordinates': runs}
+        elif crop_radius_km and crop_center:
             runs = clip_line_to_radius(coords, crop_center, crop_radius_km)
             if not runs:
                 continue

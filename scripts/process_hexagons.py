@@ -14,7 +14,7 @@ from utils import (
     generate_hexagons_for_convex_hull, cells_to_union_geometry,
     calculate_connectivity_matrix, filter_hexagons,
     build_routes_cache, create_h3_geojson,
-    cell_to_latlng
+    cell_to_latlng, filter_h3_cells_by_boundary
 )
 
 
@@ -84,7 +84,8 @@ def apply_osmosis(connectivity_matrix: Dict[str, Dict[str, int]],
 def process_hexagons(output_dir: Path, routes: list, trips: list,
                      stop_times_by_trip: Dict[str, list], stops_data: Dict[str, Dict],
                      resolution: int = 8, buffer_rings: int = 2,
-                     prune_below: int = 0, add_background: bool = True) -> None:
+                     prune_below: int = 0, add_background: bool = True,
+                     boundary_geometry=None) -> None:
     """Process H3 hexagon-based data."""
     if not H3_AVAILABLE:
         print("\nSkipping H3 hexagon processing (h3 library not available)")
@@ -105,6 +106,8 @@ def process_hexagons(output_dir: Path, routes: list, trips: list,
     all_hexagons = generate_hexagons_near_stops(
         iter(stops_iterator), resolution=resolution, buffer_rings=buffer_rings
     )
+    if boundary_geometry is not None:
+        all_hexagons = filter_h3_cells_by_boundary(all_hexagons, boundary_geometry)
     print(f"Found {len(all_hexagons)} hexagons near stops")
     
     # Map stops to hexagons
@@ -112,6 +115,10 @@ def process_hexagons(output_dir: Path, routes: list, trips: list,
     hexagon_stops, hexagon_metadata = map_stops_to_h3_hexagons(
         iter(stops_iterator), resolution=resolution
     )
+    # A stop just inside the LGA can belong to a cell whose centroid is just
+    # outside. Preserve every cell containing an in-boundary stop so no valid
+    # service is silently discarded by the display-boundary filter.
+    all_hexagons.update(hexagon_stops)
     print(f"Mapped stops to {len(hexagon_stops)} h3 hexagons with stops")
     
     # Pre-compute trip data
@@ -225,6 +232,8 @@ def process_hexagons(output_dir: Path, routes: list, trips: list,
     if add_background:
         print("Building background fill from remaining convex-hull hexagons...")
         hull_cells = generate_hexagons_for_convex_hull(iter(stops_iterator), resolution=resolution)
+        if boundary_geometry is not None:
+            hull_cells = filter_h3_cells_by_boundary(hull_cells, boundary_geometry)
         far_cells = hull_cells - set(hexagon_stops.keys())
         bg_geometry = cells_to_union_geometry(far_cells)
         if bg_geometry:
