@@ -120,13 +120,21 @@ def feed_dates(feed_info_path: Path) -> dict[str, str]:
 
 
 def install_feed(
-    extracted: list[Path], output_directory: Path, metadata: dict[str, object]
+    archive_path: Path,
+    extracted: list[Path],
+    output_directory: Path,
+    metadata: dict[str, object],
 ) -> None:
     # Replace only GTFS text files. Documentation and unrelated files are preserved.
     for existing in output_directory.glob("*.txt"):
         existing.unlink()
     for source in extracted:
         source.replace(output_directory / source.name)
+
+    # The processing pipeline reads GTFS directly from a ZIP. Keep the exact,
+    # validated source archive as well as the extracted files used for manual
+    # inspection. Both are ignored by Git.
+    archive_path.replace(output_directory / "SEQ_GTFS.zip")
 
     metadata.update(feed_dates(output_directory / "feed_info.txt"))
     metadata_path = output_directory / "download_metadata.json"
@@ -156,7 +164,7 @@ def main() -> int:
                 "archive_sha256": archive_sha256,
                 "archive_size_bytes": archive_size,
             }
-            install_feed(extracted, output_directory, metadata)
+            install_feed(archive_path, extracted, output_directory, metadata)
     except (OSError, RuntimeError) as error:
         print(f"Error: {error}", file=sys.stderr)
         return 1

@@ -9,8 +9,8 @@ python3 scripts/download_seq_gtfs.py
 ```
 
 The downloader retrieves Translink's current `SEQ_GTFS.zip`, validates its basic
-GTFS structure, and replaces the local `.txt` files only after the new archive
-has downloaded and validated successfully. It also writes
+GTFS structure, and installs both the validated archive and its `.txt` files
+only after the new archive has downloaded successfully. It also writes
 `download_metadata.json` with the source URL, download time, archive SHA-256, and
 feed validity dates.
 
