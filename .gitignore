@@ -21,9 +21,8 @@ Thumbs.db
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
-# Generated transit-affinity data and Python caches
-static/data/
-scripts/__pycache__/
+# Generated Python caches
+**/__pycache__/
 scripts/.venv/
 scripts/gtfs/**
 debug/
