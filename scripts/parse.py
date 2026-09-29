@@ -249,15 +249,15 @@ def main():
         print("Usage: python parse.py <gtfs_dir> [city_code] [<geojson_path>] [<hexagon_resolution>]")
         print("       [--hex-buffer N] [--prune-below N] [--crop-boundary <geojson_path>]")
         print("       [--crop-radius-km R --crop-center \"<lon>,<lat>\"]")
-        print("Example: python parse.py scripts/gtfs blr scripts/geojson/blr.geojson 8")
-        print("BLR (35km crop):  python parse.py scripts/gtfs blr scripts/geojson/blr.geojson 8 \\")
-        print("                    --crop-radius-km 35 --crop-center \"77.5946,12.9716\" \\")
-        print("                    --prune-below 50 --skip-isochrones")
+        print("Brisbane: python parse.py SEQ_GTFS/SEQ_GTFS.zip brisbane \\")
+        print("              scripts/geojson/brisbane_wards.geojson 8 \\")
+        print("              --crop-boundary scripts/geojson/brisbane_lga.geojson \\")
+        print("              --skip-isochrones")
         print("Discovers all GTFS files matching <city_code>.zip and <city_code>-*.zip in <gtfs_dir>")
         sys.exit(1)
 
     gtfs_dir = Path(sys.argv[1])
-    city_code = sys.argv[2] if len(sys.argv) > 2 else 'blr'
+    city_code = sys.argv[2] if len(sys.argv) > 2 else 'brisbane'
 
     # Parse optional arguments
     geojson_path = None

@@ -1,8 +1,7 @@
 [project]
 name = "scripts"
 version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
+description = "Brisbane Transit Affinity data-processing tools"
 requires-python = ">=3.13"
 dependencies = [
     "h3>=4.3.1",

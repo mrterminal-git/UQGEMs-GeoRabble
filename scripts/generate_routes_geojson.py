@@ -5,7 +5,7 @@ Each feature is a LineString for one route, with route metadata as properties.
 
 Usage:
     python generate_routes_geojson.py <gtfs_dir> <city_code>
-    python generate_routes_geojson.py scripts/gtfs blr
+    python generate_routes_geojson.py SEQ_GTFS/SEQ_GTFS.zip brisbane
 """
 
 import sys

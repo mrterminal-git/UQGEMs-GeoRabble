@@ -15,5 +15,6 @@ were retained.
 
 The upstream `.git` directory, editor-specific `.cursor` and `.vscode` settings, and
 the Bengaluru boundary dataset at `scripts/geojson/blr.geojson` were not imported.
-Those files are not required source code for this project. Generated frontend data and
-downloaded GTFS inputs remain excluded from Git.
+Those files are not required source code for this project. The validated Brisbane
+frontend snapshot is committed so a fresh clone can run immediately; downloaded GTFS
+inputs remain excluded from Git and are identified by checksums in build metadata.
