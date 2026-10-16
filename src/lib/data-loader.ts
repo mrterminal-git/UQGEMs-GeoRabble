@@ -37,7 +37,7 @@ export async function loadRegionData(
 	};
 }
 
-let routesCache: Record<string, Record<string, Route>> = {};
+const routesCache: Record<string, Record<string, Route>> = {};
 
 export async function loadRoutes(cityCode: CityCode = 'brisbane'): Promise<Record<string, Route>> {
 	if (routesCache[cityCode]) {
@@ -48,7 +48,10 @@ export async function loadRoutes(cityCode: CityCode = 'brisbane'): Promise<Recor
 	return routesCache[cityCode];
 }
 
-let cacheIndexCache: Record<string, Record<string, string>> = {};
+const cacheIndexCache: Record<string, Record<string, string>> = {};
+type RegionRouteConnections = Record<string, Route[]>;
+type RouteChunk = Record<string, RegionRouteConnections>;
+const routeChunkCache: Record<string, RouteChunk> = {};
 
 async function loadCacheIndex(
 	type: RegionType,
@@ -77,54 +80,67 @@ function toDirectionalRoute(route: Route): Route {
 	return { ...route, trip_count: toDirectionalCount(route.trip_count) };
 }
 
+function routeChunkDir(type: RegionType): string {
+	return type === 'wards' ? 'routes_cache_chunks' : 'h3_routes_cache_chunks';
+}
+
+async function loadRouteChunk(
+	type: RegionType,
+	fromRegionId: string,
+	cityCode: CityCode
+): Promise<RouteChunk | null> {
+	const index = await loadCacheIndex(type, cityCode);
+	const chunkFilename = index[fromRegionId];
+	if (!chunkFilename) return null;
+
+	const cacheKey = `${cityCode}-${type}-${chunkFilename}`;
+	if (routeChunkCache[cacheKey]) return routeChunkCache[cacheKey];
+
+	const response = await fetch(`/data/${cityCode}/${routeChunkDir(type)}/${chunkFilename}`);
+	if (!response.ok) throw new Error(`Unable to load route data (${response.status})`);
+
+	const chunk: RouteChunk = await response.json();
+	routeChunkCache[cacheKey] = chunk;
+	return chunk;
+}
+
+export async function loadRegionRouteConnections(
+	type: RegionType,
+	fromRegionId: string,
+	cityCode: CityCode = 'brisbane'
+): Promise<RegionRouteConnections> {
+	try {
+		const chunk = await loadRouteChunk(type, fromRegionId, cityCode);
+		const connections = chunk?.[fromRegionId] || {};
+
+		return Object.fromEntries(
+			Object.entries(connections).map(([regionId, routes]) => [
+				regionId,
+				routes.map(toDirectionalRoute)
+			])
+		);
+	} catch (error) {
+		console.error('Error loading direct route connections:', error);
+		return {};
+	}
+}
+
 export async function loadConnectingRoutes(
 	type: RegionType,
 	fromRegionId: string,
 	toRegionId: string,
 	cityCode: CityCode = 'brisbane'
 ): Promise<Route[]> {
-	try {
-		const index = await loadCacheIndex(type, cityCode);
-		const chunkFilename = index[fromRegionId];
-
-		if (!chunkFilename) {
-			return [];
-		}
-
-		const dataPath = `/data/${cityCode}`;
-		const chunkPath =
-			type === 'wards'
-				? `${dataPath}/routes_cache_chunks/${chunkFilename}`
-				: `${dataPath}/h3_routes_cache_chunks/${chunkFilename}`;
-
-		const response = await fetch(chunkPath);
-		const chunkData = await response.json();
-
-		const connections = chunkData[fromRegionId];
-		if (connections && connections[toRegionId]) {
-			return connections[toRegionId].map(toDirectionalRoute);
-		}
-
-		for (const regionId in chunkData) {
-			if (regionId === fromRegionId) {
-				const regionConnections = chunkData[regionId];
-				return (regionConnections?.[toRegionId] || []).map(toDirectionalRoute);
-			}
-		}
-
-		return [];
-	} catch (error) {
-		console.error('Error loading connecting routes:', error);
-		return [];
-	}
+	const connections = await loadRegionRouteConnections(type, fromRegionId, cityCode);
+	return connections[toRegionId] || [];
 }
 
 function connectivityDir(type: RegionType): string {
 	return type === 'wards' ? 'connectivity_chunks' : 'h3_connectivity_chunks';
 }
 
-let connectivityIndexCache: Record<string, Record<string, string>> = {};
-let globalMaxScoreCache: Record<string, number> = {};
+const connectivityIndexCache: Record<string, Record<string, string>> = {};
+const globalMaxScoreCache: Record<string, number> = {};
 
 export async function loadGlobalMaxScore(
 	type: RegionType,

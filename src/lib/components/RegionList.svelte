@@ -5,7 +5,8 @@
 	import { formatEstimatedAverageInterval } from '../service-interval';
 
 	interface Props {
-		connectivityScores: ConnectivityScore[];
+		directConnectivityScores: ConnectivityScore[];
+		hasNoStopResults: boolean;
 		wards: Ward[];
 		selectedConnectedWardId: string | null;
 		hoveredConnectedWardId: string | null;
@@ -15,7 +16,8 @@
 	}
 
 	let {
-		connectivityScores,
+		directConnectivityScores,
+		hasNoStopResults,
 		wards,
 		selectedConnectedWardId,
 		hoveredConnectedWardId,
@@ -31,10 +33,7 @@
 
 	const wardMap = $derived(new Map(wards.map((w) => [w.id, w])));
 	const scoresWithStops = $derived(
-		connectivityScores.filter((score) => wardMap.get(score.wardId)?.stop_count !== 0)
-	);
-	const hasNoStopResults = $derived(
-		connectivityScores.some((score) => wardMap.get(score.wardId)?.stop_count === 0)
+		directConnectivityScores.filter((score) => wardMap.get(score.wardId)?.stop_count !== 0)
 	);
 	const isNoStopsRowHovered = $derived(
 		hoveredConnectedWardId !== null &&
@@ -89,12 +88,12 @@
 </script>
 
 <div class="p-4 flex-1 overflow-y-auto">
-	{#if connectivityScores.length === 0}
+	{#if directConnectivityScores.length === 0 && !hasNoStopResults}
 		<div
 			class="text-sm text-black"
 			style="font-family: ui-sans-serif, system-ui, sans-serif; opacity: 0.6; padding: 8px;"
 		>
-			No frequent and direct transit access.
+			No direct transit access.
 		</div>
 	{:else}
 		<div class="flex items-center justify-between mb-3">

@@ -34,6 +34,15 @@ travel-time estimate, population-accessibility score, or walking model.
 9. Large connectivity and route dictionaries are split into indexed chunks so
    the browser fetches only the selected region's data.
 
+## Map and list presentation
+
+H3 map colours use the smoothed connectivity score described below so nearby
+destination cells retain their spatial-affinity context. The **Most accessible
+areas** list is stricter: it includes only destinations with scheduled trips
+that directly visit both the selected source and destination. Its estimated
+average intervals are calculated from those direct, source-destination route
+counts, and smoothed-only destinations are not listed.
+
 ## Symmetry and the displayed number
 
 The processor writes every connection in both directions. It also combines the

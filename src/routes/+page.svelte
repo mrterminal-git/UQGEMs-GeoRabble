@@ -10,6 +10,7 @@
 		loadConnectingRoutes,
 		loadRoutesGeojson,
 		loadRegionConnectivity,
+		loadRegionRouteConnections,
 		loadRoutes,
 		type RegionData
 	} from '$lib/data-loader';
@@ -36,6 +37,7 @@
 	let selectedConnectedWard = $state<Ward | null>(null);
 	let hoveredConnectedWard = $state<string | null>(null);
 	let connectivityScores = $state<ConnectivityScore[]>([]);
+	let directConnectivityScores = $state<ConnectivityScore[]>([]);
 	let loading = $state(true);
 	let loadingMessage = $state('Loading data...');
 	let wards = $state<Ward[]>([]);
@@ -59,6 +61,9 @@
 		}
 		return map;
 	});
+	const hasNoStopResults = $derived.by(() =>
+		connectivityScores.some((score) => wardMap.get(score.wardId)?.stop_count === 0)
+	);
 
 	let wardsData: RegionData | null = $state(null);
 	let areasData: RegionData | null = $state(null);
@@ -305,6 +310,7 @@
 			selectedConnectedWard = null;
 			hoveredConnectedWard = null;
 			connectivityScores = [];
+			directConnectivityScores = [];
 			connectingRoutes = [];
 			searchQuery = '';
 			showSearchResults = false;
@@ -317,6 +323,8 @@
 		selectedWard = ward;
 		selectedConnectedWard = null;
 		hoveredConnectedWard = null;
+		connectivityScores = [];
+		directConnectivityScores = [];
 		connectingRoutes = [];
 		searchQuery = '';
 		showSearchResults = false;
@@ -328,12 +336,14 @@
 		});
 
 		if (ward.stop_count === 0) {
-			connectivityScores = [];
 			updateMapHighlighting(map, regionType, wardId, null, null, [], globalMaxScore, cityConfig);
 			return;
 		}
 
-		const connections = await loadRegionConnectivity(regionType, wardId, currentCity);
+		const [connections, directRouteConnections] = await Promise.all([
+			loadRegionConnectivity(regionType, wardId, currentCity),
+			loadRegionRouteConnections(regionType, wardId, currentCity)
+		]);
 
 		// Guard against a newer selection having superseded this one while awaiting
 		if (selectedWard?.id !== wardId) return;
@@ -345,6 +355,18 @@
 		}));
 
 		connectivityScores.sort((a, b) => b.score - a.score);
+
+		directConnectivityScores = Object.entries(directRouteConnections)
+			.map(([id, routes]) => {
+				const score = routes.reduce((total, route) => total + (route.trip_count || 0), 0);
+				return {
+					wardId: id,
+					score,
+					normalizedScore: score / globalMaxScore
+				};
+			})
+			.filter((connection) => connection.score > 0)
+			.sort((a, b) => b.score - a.score);
 
 		updateMapHighlighting(
 			map,
@@ -522,6 +544,7 @@
 		selectedConnectedWard = null;
 		hoveredConnectedWard = null;
 		connectivityScores = [];
+		directConnectivityScores = [];
 		connectingRoutes = [];
 		searchQuery = '';
 		showSearchResults = false;
@@ -733,7 +756,8 @@
 				{/if}
 
 				<RegionList
-					{connectivityScores}
+					{directConnectivityScores}
+					{hasNoStopResults}
 					{wards}
 					selectedConnectedWardId={selectedConnectedWard?.id || null}
 					hoveredConnectedWardId={hoveredConnectedWard}
