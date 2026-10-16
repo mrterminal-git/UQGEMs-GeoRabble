@@ -30,6 +30,7 @@
 	import RegionList from '$lib/components/RegionList.svelte';
 	import RoutesPanel from '$lib/components/RoutesPanel.svelte';
 	import NoTransitStopsNotice from '$lib/components/NoTransitStopsNotice.svelte';
+	import InfoCarousel from '$lib/components/InfoCarousel.svelte';
 
 	let map: Map | null = null;
 	let mapContainer: HTMLDivElement;
@@ -50,6 +51,7 @@
 	let currentCity = $state<CityCode>(getDefaultCity());
 	let shareCopied = $state(false);
 	let showInfo = $state(false);
+	let infoButton: HTMLButtonElement;
 
 	const cityConfig = $derived.by(() => getCityConfig(currentCity));
 	const supportedRegions = $derived.by(() => cityConfig.supportedRegions);
@@ -466,6 +468,11 @@
 		}
 	}
 
+	function closeInfo() {
+		showInfo = false;
+		requestAnimationFrame(() => infoButton?.focus());
+	}
+
 	let hoverDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
 	function handleMapRegionHover(regionId: string | null) {
@@ -730,6 +737,7 @@
 					<button
 						type="button"
 						onclick={() => (showInfo = true)}
+						bind:this={infoButton}
 						title="About"
 						aria-label="About"
 						class="flex items-center justify-center rounded border border-black/30 h-7 w-7 text-black cursor-pointer hover:bg-black/5 transition-colors"
@@ -804,102 +812,8 @@
 	</div>
 </div>
 
-<svelte:window onkeydown={(e) => e.key === 'Escape' && (showInfo = false)} />
-
 {#if showInfo}
-	<div
-		class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
-		role="presentation"
-		onclick={(e) => e.target === e.currentTarget && (showInfo = false)}
-	>
-		<div
-			class="relative max-h-[85vh] w-full max-w-md overflow-y-auto rounded-lg p-6 shadow-xl"
-			style="background-color: rgb(245, 241, 232);"
-			role="dialog"
-			aria-modal="true"
-			aria-labelledby="info-title"
-			tabindex="-1"
-		>
-			<button
-				type="button"
-				onclick={() => (showInfo = false)}
-				title="Close"
-				aria-label="Close"
-				class="absolute right-3 top-3 flex items-center justify-center rounded p-1 text-black cursor-pointer hover:bg-black/5 transition-colors"
-			>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					width="18"
-					height="18"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					aria-hidden="true"
-				>
-					<line x1="18" y1="6" x2="6" y2="18" />
-					<line x1="6" y1="6" x2="18" y2="18" />
-				</svg>
-			</button>
-
-			<h2
-				id="info-title"
-				class="mb-3 pr-6 text-sm font-bold text-black"
-				style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; letter-spacing: 0.35px;"
-			>
-				ABOUT BRISBANE TRANSIT AFFINITY
-			</h2>
-
-			<div
-				class="space-y-3 text-sm leading-relaxed text-black"
-				style="font-family: ui-sans-serif, system-ui, sans-serif;"
-			>
-				<p>
-					Brisbane Transit Affinity visualizes direct public-transport connectivity within the
-					Brisbane City Council local government area.
-				</p>
-				<p>
-					Stops and Wednesday schedules are taken from Translink GTFS data, then mapped onto H3
-					resolution 8 hexagons or Brisbane's 26 council electorates. For each pair of areas, the
-					score counts scheduled direct trips connecting them. Bus, train, light rail and ferry
-					routes use the same scoring rules.
-				</p>
-				<p>
-					Select any area on the map to see its connectedness or affinity to the rest of the city,
-					color-coded from low (red) to high (green).
-				</p>
-				<p>Select a paired area to view the routes that connect the two areas together.</p>
-				<p>
-					Shift-click an H3 area to inspect it as a destination without changing the selected
-					source.
-				</p>
-			</div>
-
-			<a
-				href="https://github.com/mrterminal-git/UQGEMs-GeoRabble"
-				target="_blank"
-				rel="noopener noreferrer"
-				class="mt-4 inline-flex items-center gap-2 rounded border border-black/30 px-3 py-1.5 text-xs font-bold text-black hover:bg-black/5 transition-colors"
-				style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; letter-spacing: 0.35px;"
-			>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					width="16"
-					height="16"
-					viewBox="0 0 24 24"
-					fill="currentColor"
-					aria-hidden="true"
-				>
-					<path
-						d="M12 .5C5.37.5 0 5.87 0 12.5c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58 0-.29-.01-1.04-.02-2.04-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.49.99.11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02 0 2.05.14 3 .4 2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.24 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.62-5.49 5.92.43.37.81 1.1.81 2.22 0 1.6-.01 2.89-.01 3.29 0 .32.22.7.83.58A12.01 12.01 0 0 0 24 12.5C24 5.87 18.63.5 12 .5z"
-					/>
-				</svg>
-				<span>VIEW ON GITHUB</span>
-			</a>
-		</div>
-	</div>
+	<InfoCarousel onClose={closeInfo} />
 {/if}
 
 <style>
