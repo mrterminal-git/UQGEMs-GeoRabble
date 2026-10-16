@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Route, RegionType } from '../types';
+	import { formatEstimatedAverageInterval } from '../service-interval';
 
 	interface Props {
 		connectingRoutes: Route[];
@@ -9,18 +10,6 @@
 	}
 
 	let { connectingRoutes, regionType, selectedRouteId, onSelectRoute }: Props = $props();
-
-	const OPERATIONAL_HOURS = 16;
-	function formatWaitTime(count: number): string {
-		const tripsPerHour = count / OPERATIONAL_HOURS;
-		if (tripsPerHour <= 0) return '–';
-		const rawMinutes = 60 / tripsPerHour;
-		if (rawMinutes > 0 && rawMinutes < 5) {
-			const rounded = Math.round(rawMinutes * 2) / 2;
-			return `${Math.max(0.5, rounded)} min`;
-		}
-		return `${Math.max(1, Math.round(rawMinutes))} min`;
-	}
 </script>
 
 <div class="p-4 flex-1 overflow-y-auto" style="background-color: rgb(229, 229, 229);">
@@ -33,7 +22,7 @@
 		</p>
 	{:else}
 		<div class="space-y-3">
-			{#each connectingRoutes as route}
+			{#each connectingRoutes as route (route.route_id)}
 				<button
 					onclick={() => onSelectRoute(selectedRouteId === route.route_id ? null : route.route_id)}
 					class="w-full text-left rounded p-3 transition-colors"
@@ -52,7 +41,7 @@
 							class="text-xs"
 							style="color: rgb(0, 0, 0); opacity: 0.6; font-family: ui-sans-serif, system-ui, sans-serif;"
 						>
-							<p>{formatWaitTime(route.trip_count)} ({route.trip_count} trips)</p>
+							<p>{formatEstimatedAverageInterval(route.trip_count)}</p>
 						</div>
 					{/if}
 				</button>

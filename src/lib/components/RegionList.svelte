@@ -2,6 +2,7 @@
 	import { SvelteMap } from 'svelte/reactivity';
 	import type { ConnectivityScore, Ward, RegionType } from '../types';
 	import { getRegionDisplayName } from '../region-display';
+	import { formatEstimatedAverageInterval } from '../service-interval';
 
 	interface Props {
 		connectivityScores: ConnectivityScore[];
@@ -85,18 +86,6 @@
 		});
 		return () => cancelAnimationFrame(frame);
 	});
-
-	const OPERATIONAL_HOURS = 16;
-	function formatWaitTime(score: number): string {
-		const tripsPerHour = score / OPERATIONAL_HOURS;
-		if (tripsPerHour <= 0) return '–';
-		const rawMinutes = 60 / tripsPerHour;
-		if (rawMinutes > 0 && rawMinutes < 5) {
-			const rounded = Math.round(rawMinutes * 2) / 2;
-			return `${Math.max(0.5, rounded)} min`;
-		}
-		return `${Math.max(1, Math.round(rawMinutes))} min`;
-	}
 </script>
 
 <div class="p-4 flex-1 overflow-y-auto">
@@ -117,9 +106,9 @@
 			</p>
 			<span
 				class="text-xs text-black"
-				style="opacity: 0.4; font-size: 9px; font-family: ui-sans-serif, system-ui, sans-serif;"
+				style="opacity: 0.5; font-size: 10px; font-family: ui-sans-serif, system-ui, sans-serif;"
 			>
-				interval/headway · no. of trips
+				Estimated average interval
 			</span>
 		</div>
 		<div class="space-y-1">
@@ -143,7 +132,7 @@
 						</span>
 						<div class="flex flex-col items-end">
 							<span class="text-xs text-black" style="opacity: 0.6; font-size: 12px;"
-								>{formatWaitTime(score.score)} ({Math.round(score.score)} trips)</span
+								>{formatEstimatedAverageInterval(score.score)}</span
 							>
 						</div>
 					</div>
