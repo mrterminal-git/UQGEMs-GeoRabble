@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Process ward-based data from GTFS and GeoJSON.
+Process council electorate data from GTFS and GeoJSON.
 """
 
 import sys
@@ -17,28 +17,28 @@ from utils import (
 def process_wards(geojson_path: Path, output_dir: Path,
                   routes: list, trips: list, stop_times_by_trip: Dict[str, list],
                   stops_data: Dict[str, Dict]) -> Dict[str, Set[str]]:
-    """Process ward-based data using optimized stop connectivity aggregation."""
+    """Process council electorate data using optimized stop connectivity aggregation."""
     print("\n" + "="*50)
-    print("Processing wards...")
+    print("Processing council electorates...")
     print("="*50)
     
     # Load GeoJSON
     geojson = load_geojson(str(geojson_path))
     
-    # Map stops to wards - convert stops_data to iterator format
+    # Map stops to council electorates - convert stops_data to iterator format
     stops_iterator = [
         {'stop_id': stop_id, 'stop_lat': str(stop['stop_lat']), 'stop_lon': str(stop['stop_lon'])}
         for stop_id, stop in stops_data.items()
     ]
-    print("Mapping stops to wards...")
+    print("Mapping stops to council electorates...")
     ward_stops = map_stops_to_wards(iter(stops_iterator), geojson)
-    print(f"Mapped stops to {len(ward_stops)} wards")
+    print(f"Mapped stops to {len(ward_stops)} council electorates")
     
     # Save basic data
     save_json({ward_id: list(stop_set) for ward_id, stop_set in ward_stops.items()},
               output_dir / 'ward_stops.json')
     
-    # Save ward GeoJSON
+    # Save council electorate GeoJSON
     save_geojson(geojson, output_dir / 'wards.geojson')
     
     # Pre-compute trip data
@@ -55,15 +55,15 @@ def process_wards(geojson_path: Path, output_dir: Path,
         ward_stops, trip_stop_ids
     )
     
-    # Ensure all wards are in the connectivity matrix
+    # Ensure all council electorates are in the connectivity matrix
     for ward_id in ward_stops.keys():
         if ward_id not in connectivity_matrix:
             connectivity_matrix[ward_id] = {}
     
     save_json(connectivity_matrix, output_dir / 'connectivity_matrix.json')
     
-    # Build wards list with metadata
-    print("Building wards list...")
+    # Build council electorate list with metadata
+    print("Building council electorate list...")
     wards_list = []
     for feature in geojson.get('features', []):
         geometry = feature.get('geometry')
@@ -74,8 +74,8 @@ def process_wards(geojson_path: Path, output_dir: Path,
         if not ward_id:
             continue
         
-        # Use an interior point so MultiPolygon wards and concave wards always
-        # focus the map on a location within the selected ward.
+        # Use an interior point so MultiPolygon and concave council electorates
+        # always focus the map on a location within the selected electorate.
         centroid_lon, centroid_lat = calculate_geojson_geometry_center(geometry)
         
         # Get stop count
@@ -88,10 +88,10 @@ def process_wards(geojson_path: Path, output_dir: Path,
             'stop_count': stop_count
         })
     
-    # Sort by ward ID for consistency
+    # Sort by council electorate ID for consistency
     wards_list.sort(key=lambda w: w['id'])
     save_json(wards_list, output_dir / 'wards.json')
-    print(f"Saved {len(wards_list)} wards to wards.json")
+    print(f"Saved {len(wards_list)} council electorates to wards.json")
     
     # Use trip_regions and stop_to_regions from connectivity calculation
     stop_to_regions = {k: v for k, v in stop_to_regions_result.items()}
@@ -105,7 +105,7 @@ def process_wards(geojson_path: Path, output_dir: Path,
     )
     save_json(routes_cache, output_dir / 'routes_cache.json')
     
-    print("Ward processing complete!")
+    print("Council electorate processing complete!")
     return ward_stops
 
 
@@ -134,7 +134,7 @@ def main():
     # Load GTFS data
     gtfs_data, routes, trips, stop_times_by_trip, stops_data = load_gtfs_data(gtfs_zip)
 
-    # Process wards
+    # Process council electorates
     process_wards(geojson_path, output_dir, routes, trips,
                   stop_times_by_trip, stops_data)
 

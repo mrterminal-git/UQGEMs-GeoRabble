@@ -297,7 +297,10 @@ def main():
     data_dir.mkdir(parents=True, exist_ok=True)
     
     if geojson_path and not geojson_path.exists():
-        print(f"Warning: GeoJSON file not found: {geojson_path}, skipping ward processing")
+        print(
+            f"Warning: GeoJSON file not found: {geojson_path}, "
+            "skipping council electorate processing"
+        )
         geojson_path = None
     
     # Step 0: Load GTFS data once
@@ -326,10 +329,10 @@ def main():
         data_dir, crop_boundary_path, geojson_path
     )
     
-    # Step 1: Process wards (if GeoJSON provided)
+    # Step 1: Process council electorates (if GeoJSON provided)
     if geojson_path:
         print("\n" + "="*60)
-        print(f"STEP 1: Processing wards for {city_code}")
+        print(f"STEP 1: Processing council electorates for {city_code}")
         print("="*60)
         process_wards(geojson_path, data_dir, routes, trips, stop_times_by_trip,
                       stops_data)

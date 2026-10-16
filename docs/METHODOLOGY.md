@@ -7,7 +7,7 @@ also visit every other region. It supports two independently processed region
 systems:
 
 - H3 resolution 8 cells (labelled **Areas** in the interface)
-- Brisbane City Council's 26 electoral wards
+- Brisbane City Council's 26 council electorates
 
 The present score is a service-frequency measure. It is not a journey planner,
 travel-time estimate, population-accessibility score, or walking model.
@@ -16,18 +16,19 @@ travel-time estimate, population-accessibility score, or walking model.
 
 1. `download_seq_gtfs.py` downloads and validates Translink's current South East
    Queensland GTFS archive.
-2. `download_brisbane_boundaries.py` downloads the official ward layer, checks
-   for exactly 26 unique wards, and dissolves them into the BCC LGA boundary.
+2. `download_brisbane_boundaries.py` downloads the official council electorate
+   layer, checks for exactly 26 unique council electorates, and dissolves them
+   into the BCC LGA boundary.
 3. `parse.py` selects services marked active on Wednesday in `calendar.txt`.
 4. Stops outside the BCC boundary are removed. Trips with fewer than two
    surviving stops and routes with no surviving trips are removed.
 5. Each remaining stop is assigned to one H3 cell and, where covered by the
-   official geometry, one ward.
+   official geometry, one council electorate.
 6. Every trip is reduced to the set of regions it visits. That trip adds one to
    every distinct region pair in that set. Stop count does not multiply the
    score, and there is no transfer between trips.
 7. H3 scores receive the upstream destination-side smoothing described below.
-   Ward scores do not.
+   Council electorate scores do not.
 8. Route metadata and route geometry are generated for the selected pairs;
    geometry is clipped to the BCC boundary.
 9. Large connectivity and route dictionaries are split into indexed chunks so

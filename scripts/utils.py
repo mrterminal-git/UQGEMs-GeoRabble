@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Common utilities for GTFS data processing.
-Shared functionality for wards, hexagons, and isochrones processing.
+Shared functionality for council electorates, hexagons, and isochrones processing.
 """
 
 import zipfile
@@ -374,9 +374,9 @@ def calculate_polygon_centroid(polygon_coords: List[List[List[float]]]) -> Tuple
 # ============================================================================
 
 def map_stops_to_wards(stops: Iterator[Dict], geojson: Dict) -> Dict[str, Set[str]]:
-    """Map each stop to the ward(s) it belongs to."""
+    """Map each stop to the council electorate(s) it belongs to."""
     if not SHAPELY_AVAILABLE:
-        raise ImportError("shapely is required for ward processing")
+        raise ImportError("shapely is required for council electorate processing")
 
     ward_stops: Dict[str, Set[str]] = {}
     ward_polygons: Dict[str, Any] = {}

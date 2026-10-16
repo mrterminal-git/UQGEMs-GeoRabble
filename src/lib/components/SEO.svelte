@@ -12,8 +12,8 @@
 
 	let {
 		title = 'Brisbane Transit Affinity',
-		description = 'Explore direct public-transport connectivity between H3 areas and council wards in Brisbane.',
-		keywords = 'brisbane,translink,transit,public transport,bus,train,ferry,connectivity,affinity,gtfs,h3,council wards',
+		description = 'Explore direct public-transport connectivity between H3 areas and council electorates in Brisbane.',
+		keywords = 'brisbane,translink,transit,public transport,bus,train,ferry,connectivity,affinity,gtfs,h3,council electorates',
 		author = 'UQGEMs GeoRabble',
 		image = '',
 		url = '',

@@ -29,7 +29,7 @@
 			class="text-sm"
 			style="color: rgb(0, 0, 0); opacity: 0.6; font-family: ui-sans-serif, system-ui, sans-serif;"
 		>
-			No routes found connecting these {regionType === 'wards' ? 'wards' : 'areas'}.
+			No routes found connecting these {regionType === 'wards' ? 'council electorates' : 'areas'}.
 		</p>
 	{:else}
 		<div class="space-y-3">

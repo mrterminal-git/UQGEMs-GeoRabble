@@ -63,7 +63,9 @@ def validate(data_dir: Path, expected_wards: int) -> None:
     wards = load_json(data_dir / 'wards.json')
     ward_ids = {ward['id'] for ward in wards}
     if len(wards) != expected_wards or len(ward_ids) != expected_wards:
-        raise ValueError(f'expected {expected_wards} unique wards, found {len(ward_ids)}')
+        raise ValueError(
+            f'expected {expected_wards} unique council electorates, found {len(ward_ids)}'
+        )
     ward_geojson = load_json(data_dir / 'wards.geojson')
     ward_feature_ids = {
         feature.get('properties', {}).get('namecol')
@@ -112,14 +114,14 @@ def validate(data_dir: Path, expected_wards: int) -> None:
     if metadata.get('representative_day') != 'wednesday':
         raise ValueError('build metadata does not record Wednesday service')
 
-    print(f'Validated {len(hex_ids)} hexagons and {len(ward_ids)} wards')
+    print(f'Validated {len(hex_ids)} hexagons and {len(ward_ids)} council electorates')
     print(f'Routes: {len(routes)} metadata records, {len(route_features)} map features')
     print(
         'Chunks: '
         f'h3 connectivity={h3_connectivity_chunks} (max {h3_max}), '
         f'h3 routes={h3_route_chunks}, '
-        f'ward connectivity={ward_connectivity_chunks} (max {ward_max}), '
-        f'ward routes={ward_route_chunks}'
+        f'council electorate connectivity={ward_connectivity_chunks} (max {ward_max}), '
+        f'council electorate routes={ward_route_chunks}'
     )
 
 

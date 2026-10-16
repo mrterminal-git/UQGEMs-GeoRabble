@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Split large cache files into smaller chunks for better performance.
-Each chunk is keyed by the first-level key (ward/hexagon ID).
+Each chunk is keyed by the first-level key (council electorate/hexagon ID).
 """
 
 import json
@@ -11,7 +11,7 @@ from typing import Dict, Any
 
 
 def sanitize_filename(ward_id: str) -> str:
-    """Sanitize ward/hexagon ID for use in filename."""
+    """Sanitize council electorate/hexagon ID for use in filename."""
     return ward_id.replace(':', '_').replace('/', '_')
 
 

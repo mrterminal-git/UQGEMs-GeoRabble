@@ -11,7 +11,7 @@
 
 	const regionLabels: Record<RegionType, string> = {
 		hexagons: 'Areas',
-		wards: 'Wards'
+		wards: 'Council electorates'
 	};
 </script>
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Download Brisbane City Council wards and derive the enclosing LGA boundary."""
+"""Download Brisbane City Council electorates and derive the enclosing LGA boundary."""
 
 from __future__ import annotations
 
@@ -34,7 +34,7 @@ ATTRIBUTION = (
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Download the official Brisbane City Council ward boundaries."
+        description="Download the official Brisbane City Council electorate boundaries."
     )
     parser.add_argument(
         "--output",
@@ -108,15 +108,15 @@ def normalize_wards(document: dict[str, Any]) -> dict[str, Any]:
         if not name or not geometry:
             continue
         if geometry.get("type") not in {"Polygon", "MultiPolygon"}:
-            raise RuntimeError(f"ward {name!r} has unsupported geometry")
+            raise RuntimeError(f"council electorate {name!r} has unsupported geometry")
         if name in seen_names:
-            raise RuntimeError(f"duplicate ward name: {name}")
+            raise RuntimeError(f"duplicate council electorate name: {name}")
 
         ward_geometry = shape(geometry)
         if not ward_geometry.is_valid:
             ward_geometry = ward_geometry.buffer(0)
         if ward_geometry.is_empty or not ward_geometry.is_valid:
-            raise RuntimeError(f"ward {name!r} has invalid geometry")
+            raise RuntimeError(f"council electorate {name!r} has invalid geometry")
 
         seen_names.add(name)
         wards.append(
@@ -134,7 +134,8 @@ def normalize_wards(document: dict[str, Any]) -> dict[str, Any]:
 
     if len(wards) != EXPECTED_WARD_COUNT:
         raise RuntimeError(
-            f"expected {EXPECTED_WARD_COUNT} Brisbane wards, received {len(wards)}"
+            f"expected {EXPECTED_WARD_COUNT} Brisbane council electorates, "
+            f"received {len(wards)}"
         )
 
     wards.sort(key=lambda feature: feature["properties"]["namecol"])
@@ -209,7 +210,7 @@ def main() -> int:
         return 1
 
     print(
-        f"Installed {len(wards['features'])} Brisbane wards and the derived LGA "
+        f"Installed {len(wards['features'])} Brisbane council electorates and the derived LGA "
         f"boundary in {args.output.resolve()}"
     )
     return 0

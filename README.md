@@ -2,7 +2,7 @@
 
 An interactive map of scheduled public-transport connectivity within the
 Brisbane City Council local government area. Select either an H3 area or one of
-Brisbane's 26 council wards to see which other regions can be reached on the same
+Brisbane's 26 council electorates to see which other regions can be reached on the same
 scheduled trip.
 
 This project is based on
@@ -26,13 +26,13 @@ corepack enable
 corepack prepare pnpm@12.6.0 --activate
 ```
 
-Then open <http://localhost:5173/>. Use the **Areas / Wards** control to switch
-between H3 hexagons and the 26 council wards.
+Then open <http://localhost:5173/>. Use the **Areas / Council electorates** control
+to switch between H3 hexagons and the 26 council electorates.
 
 ## Current model
 
 - Scope: Brisbane City Council local government area
-- Regions: H3 resolution 8 and all 26 council wards
+- Regions: H3 resolution 8 and all 26 council electorates
 - Schedule: services whose `calendar.txt` entry runs on a generic Wednesday
 - Journeys: direct trips only; transfers are not included
 - Modes: every scheduled trip has equal weight, including ferries
@@ -78,8 +78,8 @@ pnpm.cmd run build
 ## Structure
 
 - `src/`: SvelteKit and MapLibre interactive map
-- `scripts/`: GTFS, H3, ward, route, chunking, and validation pipeline
-- `scripts/geojson/`: reproducible Brisbane ward and LGA boundaries
+- `scripts/`: GTFS, H3, council electorate, route, chunking, and validation pipeline
+- `scripts/geojson/`: reproducible Brisbane council electorate and LGA boundaries
 - `static/data/brisbane/`: browser-ready generated snapshot
 - `SEQ_GTFS/`: locally downloaded Translink input (ignored by Git)
 - `archive/`: the previous UQ St Lucia project; not part of this application
@@ -87,7 +87,7 @@ pnpm.cmd run build
 ## Data sources and licences
 
 - Timetables and stops: [Translink open data](https://translink.com.au/about-translink/open-data)
-- Ward boundaries: [Queensland Government administrative boundaries](https://spatial-gis.information.qld.gov.au/arcgis/rest/services/Boundaries/AdministrativeBoundaries/MapServer/8)
+- Council electorate boundaries: [Queensland Government administrative boundaries](https://spatial-gis.information.qld.gov.au/arcgis/rest/services/Boundaries/AdministrativeBoundaries/MapServer/8)
 
 The application code is MIT licensed; see [`LICENSE`](LICENSE). Source-data
 attribution and licence details are recorded beside the downloaded or generated

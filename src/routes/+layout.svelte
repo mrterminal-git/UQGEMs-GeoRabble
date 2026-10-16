@@ -26,7 +26,7 @@
 
 <SEO
 	title={cityConfig.siteName}
-	description="Explore direct public-transport connectivity between H3 areas and council wards in Brisbane."
+	description="Explore direct public-transport connectivity between H3 areas and council electorates in Brisbane."
 />
 
 {@render children()}
