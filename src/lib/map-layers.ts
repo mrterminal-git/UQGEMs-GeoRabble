@@ -93,7 +93,7 @@ export function setRegionSourceData(
 export function initializeMapLayers(
 	map: Map,
 	geojsonData: GeoJSONFeatureCollection,
-	onRegionClick: (regionId: string) => void,
+	onRegionClick: (regionId: string, selectAsDestination: boolean) => void,
 	onRegionHover: (regionId: string | null) => void,
 	regionType?: RegionType,
 	wardsData?: Array<{ id: string; name: string; stop_count: number }>,
@@ -166,12 +166,21 @@ export function initializeMapLayers(
 		}
 	});
 
+	// MapLibre reserves Shift + left mouse for box zoom and suppresses the
+	// subsequent click even when the pointer does not move. Prevent that default
+	// interaction over regions so Shift-click can select an H3 destination.
+	map.on('mousedown', 'wards-fill', (e) => {
+		if (e.originalEvent.shiftKey) {
+			e.preventDefault();
+		}
+	});
+
 	map.on('click', 'wards-fill', (e) => {
 		if (e.features && e.features[0]) {
 			if (e.features[0].properties?.is_background) return;
 			const regionId = e.features[0].properties?.namecol || e.features[0].properties?.hex_id;
 			if (regionId) {
-				onRegionClick(regionId);
+				onRegionClick(String(regionId), e.originalEvent.shiftKey);
 			}
 		}
 	});

@@ -41,7 +41,9 @@ destination cells retain their spatial-affinity context. The **Most accessible
 areas** list is stricter: it includes only destinations with scheduled trips
 that directly visit both the selected source and destination. Its estimated
 average intervals are calculated from those direct, source-destination route
-counts, and smoothed-only destinations are not listed.
+counts. H3 destinations with stops but no direct connection share one **No
+direct routes available** status row, while destinations without stops retain
+their separate **No transit stops** status row.
 
 ## Symmetry and the displayed number
 

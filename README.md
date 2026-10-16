@@ -27,7 +27,8 @@ corepack prepare pnpm@12.6.0 --activate
 ```
 
 Then open <http://localhost:5173/>. Use the **Areas / Council electorates** control
-to switch between H3 hexagons and the 26 council electorates.
+to switch between H3 hexagons and the 26 council electorates. Shift-click an H3
+area to inspect it as a destination while keeping the current source selected.
 
 ## Current model
 

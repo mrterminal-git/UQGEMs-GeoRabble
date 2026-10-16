@@ -8,6 +8,7 @@
 		directConnectivityScores: ConnectivityScore[];
 		hasNoStopResults: boolean;
 		wards: Ward[];
+		selectedRegionId: string;
 		selectedConnectedWardId: string | null;
 		hoveredConnectedWardId: string | null;
 		regionType: RegionType;
@@ -19,6 +20,7 @@
 		directConnectivityScores,
 		hasNoStopResults,
 		wards,
+		selectedRegionId,
 		selectedConnectedWardId,
 		hoveredConnectedWardId,
 		regionType,
@@ -29,11 +31,31 @@
 	const INITIAL_DISPLAY_COUNT = 100;
 	let showAll = $state(false);
 	const rowElements = new SvelteMap<string, HTMLButtonElement>();
+	let noDirectRoutesRow = $state<HTMLDivElement>();
 	let noStopsRow = $state<HTMLDivElement>();
 
 	const wardMap = $derived(new Map(wards.map((w) => [w.id, w])));
+	const directRegionIds = $derived(new Set(directConnectivityScores.map((score) => score.wardId)));
+	const noDirectRouteRegionIds = $derived(
+		new Set(
+			regionType === 'hexagons'
+				? wards
+						.filter(
+							(region) =>
+								region.id !== selectedRegionId &&
+								region.stop_count > 0 &&
+								!directRegionIds.has(region.id)
+						)
+						.map((region) => region.id)
+				: []
+		)
+	);
+	const hasNoDirectRouteResults = $derived(noDirectRouteRegionIds.size > 0);
 	const scoresWithStops = $derived(
 		directConnectivityScores.filter((score) => wardMap.get(score.wardId)?.stop_count !== 0)
+	);
+	const isNoDirectRoutesRowHovered = $derived(
+		hoveredConnectedWardId !== null && noDirectRouteRegionIds.has(hoveredConnectedWardId)
 	);
 	const isNoStopsRowHovered = $derived(
 		hoveredConnectedWardId !== null &&
@@ -73,6 +95,13 @@
 			return () => cancelAnimationFrame(frame);
 		}
 
+		if (noDirectRouteRegionIds.has(regionId)) {
+			frame = requestAnimationFrame(() => {
+				noDirectRoutesRow?.scrollIntoView({ block: 'nearest' });
+			});
+			return () => cancelAnimationFrame(frame);
+		}
+
 		const resultIndex = scoresWithStops.findIndex((score) => score.wardId === regionId);
 		if (resultIndex < 0) return;
 
@@ -88,7 +117,7 @@
 </script>
 
 <div class="p-4 flex-1 overflow-y-auto">
-	{#if directConnectivityScores.length === 0 && !hasNoStopResults}
+	{#if directConnectivityScores.length === 0 && !hasNoDirectRouteResults && !hasNoStopResults}
 		<div
 			class="text-sm text-black"
 			style="font-family: ui-sans-serif, system-ui, sans-serif; opacity: 0.6; padding: 8px;"
@@ -148,6 +177,18 @@
 					Show all {scoresWithStops.length}
 					{regionType === 'wards' ? 'council electorates' : 'areas'}
 				</button>
+			{/if}
+			{#if hasNoDirectRouteResults}
+				<div
+					bind:this={noDirectRoutesRow}
+					class="w-full rounded text-left text-sm text-black transition-colors"
+					style="padding: 8px; font-family: ui-sans-serif, system-ui, sans-serif; {isNoDirectRoutesRowHovered
+						? 'background-color: rgb(219, 234, 254); border-left: 4px solid rgb(37, 99, 235);'
+						: 'background-color: rgb(250, 250, 250);'}"
+					role="status"
+				>
+					No direct routes available
+				</div>
 			{/if}
 			{#if hasNoStopResults}
 				<div

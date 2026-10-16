@@ -164,9 +164,7 @@
 			initializeMapLayers(
 				map,
 				geojsonData,
-				(regionId: string) => {
-					selectWard(regionId);
-				},
+				handleMapRegionClick,
 				handleMapRegionHover,
 				regionType,
 				wards,
@@ -452,6 +450,22 @@
 		);
 	}
 
+	function handleMapRegionClick(regionId: string, selectAsDestination: boolean) {
+		if (!selectAsDestination || regionType !== 'hexagons') {
+			selectWard(regionId);
+			return;
+		}
+
+		if (!selectedWard) {
+			selectWard(regionId);
+			return;
+		}
+
+		if (regionId !== selectedWard.id) {
+			selectConnectedWard(regionId);
+		}
+	}
+
 	let hoverDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
 	function handleMapRegionHover(regionId: string | null) {
@@ -620,9 +634,7 @@
 					initializeMapLayers(
 						map,
 						geojsonData,
-						(regionId: string) => {
-							selectWard(regionId);
-						},
+						handleMapRegionClick,
 						handleMapRegionHover,
 						regionType,
 						wards,
@@ -759,6 +771,7 @@
 					{directConnectivityScores}
 					{hasNoStopResults}
 					{wards}
+					selectedRegionId={selectedWard.id}
 					selectedConnectedWardId={selectedConnectedWard?.id || null}
 					hoveredConnectedWardId={hoveredConnectedWard}
 					{regionType}
@@ -858,6 +871,10 @@
 					color-coded from low (red) to high (green).
 				</p>
 				<p>Select a paired area to view the routes that connect the two areas together.</p>
+				<p>
+					Shift-click an H3 area to inspect it as a destination without changing the selected
+					source.
+				</p>
 			</div>
 
 			<a
