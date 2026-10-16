@@ -21,12 +21,14 @@
 		setRegionSourceData
 	} from '$lib/map-layers';
 	import type { RegionType, Ward, ConnectivityScore, Route } from '$lib/types';
+	import { getRegionDisplayName } from '$lib/region-display';
 	import type { CityCode } from '$lib/cityConfigs';
 	import { getCityConfig, getDefaultCity, cityConfigs } from '$lib/cityConfigs';
 	import RegionTypeToggle from '$lib/components/RegionTypeToggle.svelte';
 	import SelectedRegionInfo from '$lib/components/SelectedRegionInfo.svelte';
 	import RegionList from '$lib/components/RegionList.svelte';
 	import RoutesPanel from '$lib/components/RoutesPanel.svelte';
+	import NoTransitStopsNotice from '$lib/components/NoTransitStopsNotice.svelte';
 
 	let map: Map | null = null;
 	let mapContainer: HTMLDivElement;
@@ -160,6 +162,7 @@
 				(regionId: string) => {
 					selectWard(regionId);
 				},
+				handleMapRegionHover,
 				regionType,
 				wards,
 				cityConfig
@@ -324,6 +327,12 @@
 			duration: 1000
 		});
 
+		if (ward.stop_count === 0) {
+			connectivityScores = [];
+			updateMapHighlighting(map, regionType, wardId, null, null, [], globalMaxScore, cityConfig);
+			return;
+		}
+
 		const connections = await loadRegionConnectivity(regionType, wardId, currentCity);
 
 		// Guard against a newer selection having superseded this one while awaiting
@@ -384,6 +393,20 @@
 			duration: 1000
 		});
 
+		if (ward.stop_count === 0) {
+			updateMapHighlighting(
+				map,
+				regionType,
+				selectedWard.id,
+				wardId,
+				null,
+				connectivityScores,
+				globalMaxScore,
+				cityConfig
+			);
+			return;
+		}
+
 		const [routeData, routesLookup] = await Promise.all([
 			loadConnectingRoutes(regionType, selectedWard.id, wardId, currentCity),
 			loadRoutes(currentCity)
@@ -408,6 +431,17 @@
 	}
 
 	let hoverDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+	function handleMapRegionHover(regionId: string | null) {
+		const hoverableRegionId =
+			regionType === 'hexagons'
+				? regionId
+				: regionId && connectivityScores.some((score) => score.wardId === regionId)
+					? regionId
+					: null;
+		if (hoveredConnectedWard === hoverableRegionId) return;
+		handleHoverConnectedWard(hoverableRegionId);
+	}
 
 	function handleHoverConnectedWard(wardId: string | null) {
 		hoveredConnectedWard = wardId;
@@ -566,6 +600,7 @@
 						(regionId: string) => {
 							selectWard(regionId);
 						},
+						handleMapRegionHover,
 						regionType,
 						wards,
 						cityConfig
@@ -688,34 +723,45 @@
 		</div>
 
 		{#if selectedWard}
-			{#if connectivityScores.length > 0}
-				<SelectedRegionInfo selectedRegion={selectedWard.name} />
-			{/if}
+			{#if selectedWard.stop_count === 0}
+				<NoTransitStopsNotice />
+			{:else}
+				{#if connectivityScores.length > 0}
+					<SelectedRegionInfo
+						selectedRegion={getRegionDisplayName(selectedWard, selectedWard.id)}
+					/>
+				{/if}
 
-			<RegionList
-				{connectivityScores}
-				{wards}
-				selectedConnectedWardId={selectedConnectedWard?.id || null}
-				{regionType}
-				onSelectConnectedWard={selectConnectedWard}
-				onHoverConnectedWard={handleHoverConnectedWard}
-			/>
-
-			{#if selectedConnectedWard}
-				<RoutesPanel
-					{connectingRoutes}
+				<RegionList
+					{connectivityScores}
+					{wards}
+					selectedConnectedWardId={selectedConnectedWard?.id || null}
+					hoveredConnectedWardId={hoveredConnectedWard}
 					{regionType}
-					{selectedRouteId}
-					onSelectRoute={handleSelectRoute}
+					onSelectConnectedWard={selectConnectedWard}
+					onHoverConnectedWard={handleHoverConnectedWard}
 				/>
+
+				{#if selectedConnectedWard}
+					{#if selectedConnectedWard.stop_count === 0}
+						<NoTransitStopsNotice />
+					{:else}
+						<RoutesPanel
+							{connectingRoutes}
+							{regionType}
+							{selectedRouteId}
+							onSelectRoute={handleSelectRoute}
+						/>
+					{/if}
+				{/if}
 			{/if}
 		{:else}
 			<div
 				class="p-4 text-black text-sm"
 				style="font-family: ui-sans-serif, system-ui, sans-serif;"
 			>
-				Select a {regionType === 'wards' ? 'ward' : 'area'} to see its affinity to other
-				{regionType === 'wards' ? 'wards' : 'areas'}.
+				Select a {regionType === 'wards' ? 'council electorate' : 'area'} to see its affinity to other
+				{regionType === 'wards' ? 'council electorates' : 'areas'}.
 			</div>
 		{/if}
 	</div>
@@ -779,9 +825,9 @@
 				</p>
 				<p>
 					Stops and Wednesday schedules are taken from Translink GTFS data, then mapped onto H3
-					resolution 8 hexagons or Brisbane's 26 council wards. For each pair of areas, the score
-					counts scheduled direct trips connecting them. Bus, train, light rail and ferry routes use
-					the same scoring rules.
+					resolution 8 hexagons or Brisbane's 26 council electorates. For each pair of areas, the
+					score counts scheduled direct trips connecting them. Bus, train, light rail and ferry
+					routes use the same scoring rules.
 				</p>
 				<p>
 					Select any area on the map to see its connectedness or affinity to the rest of the city,

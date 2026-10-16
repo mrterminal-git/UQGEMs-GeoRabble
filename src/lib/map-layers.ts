@@ -36,7 +36,7 @@ export function resetMapLayerState(): void {
 
 /**
  * Enriches features with a unified `region_id` property (used as the feature
- * id via `promoteId`) plus display name / stop_count from the ward list.
+ * id via `promoteId`) plus display name / stop_count from the council electorate list.
  */
 function enrichGeoJSON(
 	geojsonData: GeoJSONFeatureCollection,
@@ -94,6 +94,7 @@ export function initializeMapLayers(
 	map: Map,
 	geojsonData: GeoJSONFeatureCollection,
 	onRegionClick: (regionId: string) => void,
+	onRegionHover: (regionId: string | null) => void,
 	regionType?: RegionType,
 	wardsData?: Array<{ id: string; name: string; stop_count: number }>,
 	cityConfig?: CityConfig
@@ -175,12 +176,31 @@ export function initializeMapLayers(
 		}
 	});
 
+	let mapHoveredRegionId: string | null = null;
+	const updateHoveredRegion = (regionId: string | null) => {
+		if (mapHoveredRegionId === regionId) return;
+		mapHoveredRegionId = regionId;
+		onRegionHover(regionId);
+	};
+
 	map.on('mouseenter', 'wards-fill', () => {
 		map.getCanvas().style.cursor = 'pointer';
 	});
 
+	map.on('mousemove', 'wards-fill', (e) => {
+		const feature = e.features?.[0];
+		if (!feature || feature.properties?.is_background) {
+			updateHoveredRegion(null);
+			return;
+		}
+
+		const regionId = feature.properties?.namecol || feature.properties?.hex_id;
+		updateHoveredRegion(regionId ? String(regionId) : null);
+	});
+
 	map.on('mouseleave', 'wards-fill', () => {
 		map.getCanvas().style.cursor = '';
+		updateHoveredRegion(null);
 	});
 
 	map.removeLayer('boundary_2');
